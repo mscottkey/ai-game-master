@@ -46,7 +46,8 @@ The player takes the following action in-character:
 "{{playerActions}}"
 
 Generate a narrative that builds upon the setting, player actions, and campaign history, creating a compelling and unpredictable story for the players to experience. This should advance the plot.
-{{else}}
+{{/if}}
+{{#if (eq messageType "out-of-character")}}
 The player asks the following question out-of-character, as a player to the Game Master:
 "{{playerActions}}"
 
