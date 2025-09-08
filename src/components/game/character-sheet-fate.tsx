@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingState } from "./loading-state";
 import type { FateCharacter } from "@/ai/flows/generate-character.types";
 
 interface CharacterSheetFateProps {
@@ -11,28 +11,8 @@ interface CharacterSheetFateProps {
 
 export function CharacterSheetFate({ character, isLoading }: CharacterSheetFateProps) {
     if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-1/2" />
-          <Skeleton className="h-4 w-3/4" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-           <div className="space-y-2">
-             <Skeleton className="h-12 w-full" />
-             <Skeleton className="h-12 w-full" />
-           </div>
-           <Separator />
-           <div className="grid grid-cols-2 gap-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+      return <LoadingState message="Consulting the cards of fate..." />;
+    }
 
   if (!character) {
     return (

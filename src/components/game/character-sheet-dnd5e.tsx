@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Shield, Swords, Wand2, Heart, Star, Book } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingState } from "./loading-state";
 import type { Dnd5eCharacter } from "@/ai/flows/generate-character.types";
 
 interface CharacterSheetDnd5eProps {
@@ -11,26 +11,7 @@ interface CharacterSheetDnd5eProps {
 
 export function CharacterSheetDnd5e({ character, isLoading }: CharacterSheetDnd5eProps) {
   if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-1/2" />
-          <Skeleton className="h-4 w-3/4" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-          <Separator />
-          <Skeleton className="h-4 w-1/4" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-        </CardContent>
-      </Card>
-    );
+    return <LoadingState message="Rolling up your character..." />;
   }
 
   if (!character) {

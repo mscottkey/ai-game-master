@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingState } from "./loading-state";
 
 type VisualStoryBoardProps = {
   story: string;
@@ -14,7 +14,9 @@ export function VisualStoryBoard({ story, imageUrl, isLoading }: VisualStoryBoar
     <Card className="flex-shrink-0 flex flex-col h-1/2 border-b-0 rounded-b-none">
       <div className="relative w-full h-3/5">
         {isLoading ? (
-           <Skeleton className="w-full h-full rounded-t-lg" />
+          <div className="w-full h-full bg-secondary rounded-t-lg flex items-center justify-center">
+             <LoadingState message="Setting the scene..." />
+          </div>
         ) : imageUrl ? (
           <Image
             src={imageUrl}
@@ -33,11 +35,7 @@ export function VisualStoryBoard({ story, imageUrl, isLoading }: VisualStoryBoar
         <ScrollArea className="h-full">
           <div className="text-sm text-foreground/90 leading-relaxed">
             {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-              </div>
+               <div className="text-center text-muted-foreground">The Game Master is weaving the opening narrative...</div>
             ) : story}
           </div>
         </ScrollArea>

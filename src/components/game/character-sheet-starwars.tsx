@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingState } from "./loading-state";
 import type { StarWarsCharacter } from "@/ai/flows/generate-character.types";
 
 interface CharacterSheetStarWarsProps {
@@ -11,26 +11,7 @@ interface CharacterSheetStarWarsProps {
 
 export function CharacterSheetStarWars({ character, isLoading }: CharacterSheetStarWarsProps) {
   if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-1/2" />
-          <Skeleton className="h-4 w-3/4" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-2">
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-            <Skeleton className="h-16 w-full" />
-          </div>
-           <Separator />
-           <Skeleton className="h-10 w-full" />
-        </CardContent>
-      </Card>
-    );
+    return <LoadingState message="Calculating hyperspace coordinates..." />;
   }
 
   if (!character) {

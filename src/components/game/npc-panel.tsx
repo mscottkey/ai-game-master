@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Users, Plus, Volume2, Loader2 } from 'lucide-react';
+import { LoadingState } from './loading-state';
 
 type NpcPanelProps = {
   npcs: Npc[];
@@ -55,9 +56,8 @@ export function NpcPanel({ npcs, onGenerateNpcs, isLoading, speak }: NpcPanelPro
               </div>
             ))}
              {isLoading && (
-                <div className="text-center text-sm text-muted-foreground py-8 flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <p>Summoning new characters...</p>
+                <div className="pt-8">
+                  <LoadingState message="Summoning new characters..." />
                 </div>
               )}
           </div>
