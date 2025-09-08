@@ -181,7 +181,7 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
     <div className="flex flex-col h-screen bg-background font-body">
       <Header gameId={gameId} />
       <main className="flex-1 flex flex-col overflow-hidden gap-4 p-4">
-        <div className="flex-shrink-0 h-1/2">
+        <div className="flex-shrink-0">
             <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} />
         </div>
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
