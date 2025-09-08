@@ -37,6 +37,22 @@ const gameSystems = [
   },
 ];
 
+const systemPlaceholders: Record<string, { campaign: string; character: string }> = {
+  dnd5e: {
+    campaign: "A group of mercenaries are hired to investigate strange disappearances in the cursed forest of Eldwood.",
+    character: "A grizzled dwarf warrior with a mysterious past, seeking redemption for a forgotten failure.",
+  },
+  fate: {
+    campaign: "In the rain-slicked streets of a noir city, a mysterious client offers a job that's too good to be true, drawing you into a web of conspiracy.",
+    character: "A hardboiled private eye with a troubled past and a knack for finding trouble where it's darkest.",
+  },
+  "starwars-ffg": {
+    campaign: "A group of smugglers on the Outer Rim take on a risky job for a shadowy client, promising a big payout but attracting Imperial attention.",
+    character: "A cynical Twi'lek pilot who owes a debt to a Hutt and is just trying to score one last big job to get free.",
+  },
+};
+
+
 type Step = "system" | "setup";
 
 export function NewCampaignDialog() {
@@ -134,7 +150,7 @@ export function NewCampaignDialog() {
                   id="campaign-prompt"
                   value={campaignPrompt}
                   onChange={(e) => setCampaignPrompt(e.target.value)}
-                  placeholder="e.g., 'A group of mercenaries are hired to investigate strange disappearances in the cursed forest of Eldwood.'"
+                  placeholder={systemPlaceholders[selectedSystem]?.campaign || "Describe the starting scene..."}
                   className="mt-2"
                 />
               </div>
@@ -144,7 +160,7 @@ export function NewCampaignDialog() {
                   id="character-prompt"
                   value={characterPrompt}
                   onChange={(e) => setCharacterPrompt(e.target.value)}
-                  placeholder="e.g., 'A grizzled dwarf warrior with a mysterious past, seeking redemption for a forgotten failure.'"
+                  placeholder={systemPlaceholders[selectedSystem]?.character || "Describe your character..."}
                   className="mt-2"
                 />
               </div>
