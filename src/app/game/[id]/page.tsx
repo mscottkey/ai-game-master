@@ -5,7 +5,7 @@ import { useState, use } from 'react';
 import { GameClient } from './game-client';
 import { CharacterCreationClient } from './character-creation-client';
 
-type GameState = 'initializing' | 'character-creation' | 'in-progress';
+type GameState = 'character-creation' | 'in-progress';
 
 // The 'params' and 'searchParams' objects are now Promises that need to be unwrapped
 // This is a feature of the Next.js App Router
@@ -49,6 +49,6 @@ export default function GamePage({
       return <GameClient {...gameProps} />;
     default:
       // You could have a loading spinner for 'initializing'
-      return <div>Loading...</div>;
+      return <CharacterCreationClient {...gameProps} onCreationComplete={handleCreationComplete} />;
   }
 }
