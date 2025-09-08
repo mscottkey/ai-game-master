@@ -159,15 +159,17 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
   return (
     <div className="flex flex-col h-screen bg-background font-body">
       <Header gameId={gameId} />
-      <main className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-4 p-4">
-        {/* Center Panel */}
-        <div className="flex flex-col col-span-1 lg:col-span-8 h-full overflow-hidden gap-4">
-          <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} />
-          <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} />
+      <main className="flex-1 flex flex-col overflow-hidden gap-4 p-4">
+        <div className="flex-shrink-0 h-1/2">
+            <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} />
         </div>
-        {/* Right Panel */}
-        <div className="hidden lg:flex lg:flex-col lg:col-span-4 gap-4 overflow-y-auto">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
+          <div className="lg:col-span-8 h-full">
+            <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} />
+          </div>
+          <div className="hidden lg:flex lg:col-span-4 h-full">
             <ActionTracker characterPrompt={characterPrompt} />
+          </div>
         </div>
       </main>
     </div>
