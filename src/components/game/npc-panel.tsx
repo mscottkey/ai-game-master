@@ -54,7 +54,7 @@ export function NpcPanel({ npcs, onGenerateNpcs, isLoading, speak }: NpcPanelPro
                 <p className="text-sm mt-2">{npc.personality}</p>
               </div>
             ))}
-             {isLoading && npcs.length === 0 && (
+             {isLoading && (
                 <div className="text-center text-sm text-muted-foreground py-8 flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <p>Summoning new characters...</p>

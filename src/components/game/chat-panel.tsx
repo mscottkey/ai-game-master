@@ -69,7 +69,7 @@ export function ChatPanel({ messages, onSendMessage, isLoading }: ChatPanelProps
               )}
             </div>
           ))}
-          {isLoading && messages[messages.length-1].role === 'user' && (
+          {isLoading && messages.length > 0 && messages[messages.length-1].role === 'user' && (
              <div className="flex items-start gap-3 justify-start">
                <div className="p-2 bg-primary/20 rounded-full">
                   <Bot className="w-5 h-5 text-primary" />

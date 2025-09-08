@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 type VisualStoryBoardProps = {
   story: string;
-  imageUrl: string | null;
+  imageUrl: string;
   isLoading: boolean;
 };
 
@@ -32,7 +32,13 @@ export function VisualStoryBoard({ story, imageUrl, isLoading }: VisualStoryBoar
       <CardContent className="p-4 flex-1">
         <ScrollArea className="h-full">
           <div className="text-sm text-foreground/90 leading-relaxed">
-            {isLoading ? <Skeleton className="h-4 w-3/4" /> : story}
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            ) : story}
           </div>
         </ScrollArea>
       </CardContent>
