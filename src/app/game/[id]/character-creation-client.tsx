@@ -4,6 +4,8 @@
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/game/header";
 import type { GameClientProps } from "./game-client";
+import { ArrowLeft, Play } from "lucide-react";
+import Link from "next/link";
 
 interface CharacterCreationClientProps extends GameClientProps {
   onCreationComplete: () => void;
@@ -20,9 +22,18 @@ export function CharacterCreationClient({ gameId, system, onCreationComplete }: 
           This is where the collaborative character creation process will happen. 
           Players will be able to join, discuss their party composition, and generate their characters together.
         </p>
-        <Button onClick={onCreationComplete} size="lg">
-          Start The Adventure!
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Button variant="outline" size="lg" asChild>
+            <Link href="/">
+              <ArrowLeft className="mr-2" />
+              Start Over
+            </Link>
+          </Button>
+          <Button onClick={onCreationComplete} size="lg">
+            Start The Adventure!
+            <Play className="ml-2" />
+          </Button>
+        </div>
       </main>
     </div>
   );
