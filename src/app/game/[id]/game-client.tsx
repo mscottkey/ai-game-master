@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Npc } from '@/lib/types';
@@ -27,23 +28,30 @@ type GameSystem = 'dnd5e' | 'fate' | 'starwars-ffg';
 
 const systemSettings: Record<GameSystem, { gameSetting: string; settingDescription: string; imagePromptPrefix: string }> = {
   'dnd5e': {
-    gameSetting: 'A high-fantasy world named Eldoria, governed by the rules of Dungeons & Dragons 5th Edition. The players are in a tavern called The Sleeping Dragon.',
+    gameSetting: 'A high-fantasy world named Eldoria, governed by the rules of Dungeons & Dragons 5th Edition.',
     settingDescription: 'A bustling fantasy city tavern in Eldoria, filled with adventurers, merchants, and minstrels, adhering to D&D 5e lore.',
     imagePromptPrefix: 'Fantasy RPG illustration, cinematic,'
   },
   'fate': {
-    gameSetting: 'A gritty noir city named Crescent Bay in the 1940s, using the FATE Core system. The players are private investigators meeting in a dimly lit jazz club called The Blue Note.',
+    gameSetting: 'A gritty noir city named Crescent Bay in the 1940s, using the FATE Core system.',
     settingDescription: 'A smoky, dimly lit 1940s noir jazz club in Crescent Bay, filled with femme fatales, gruff detectives, and shady informants, fitting a FATE Core narrative.',
     imagePromptPrefix: '1940s noir film illustration, cinematic,'
   },
   'starwars-ffg': {
-    gameSetting: 'The Outer Rim of the Star Wars galaxy, using the Fantasy Flight Games (FFG) narrative dice system. The players are a rag-tag crew of smugglers and mercenaries meeting in a cantina on Tatooine called the Dusty Spire.',
+    gameSetting: 'The Outer Rim of the Star Wars galaxy, using the Fantasy Flight Games (FFG) narrative dice system.',
     settingDescription: 'A classic Star Wars cantina on a dusty Outer Rim planet, bustling with aliens, bounty hunters, and smugglers, as seen in the FFG rule system.',
     imagePromptPrefix: 'Star Wars concept art, cinematic,'
   },
 };
 
-export function GameClient({ gameId, system }: { gameId: string, system: GameSystem }) {
+interface GameClientProps {
+  gameId: string;
+  system: GameSystem;
+  campaignPrompt?: string;
+  characterPrompt?: string;
+}
+
+export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: GameClientProps) {
   const { toast } = useToast();
   const { speak, isSpeaking } = useTTS();
 
@@ -142,9 +150,13 @@ export function GameClient({ gameId, system }: { gameId: string, system: GameSys
   const generateInitialStory = useCallback(async () => {
     setIsInitialStoryLoading(true);
     try {
+       const initialPlayerActions = campaignPrompt 
+          ? `The Game Master has set the scene: "${campaignPrompt}". The players' characters are present. One of them is described as: "${characterPrompt || 'A new adventurer'}". The players are ready to begin.`
+          : 'The players have just gathered for the first time, seeking adventure.';
+
        const storyInput: DynamicStoryTellingInput = {
         gameSetting: activeSystemSettings.gameSetting,
-        playerActions: 'The players have just gathered for the first time, seeking adventure.',
+        playerActions: initialPlayerActions,
         campaignHistory: 'This is the very beginning of the campaign.',
       };
       
@@ -168,7 +180,7 @@ export function GameClient({ gameId, system }: { gameId: string, system: GameSys
     } finally {
       setIsInitialStoryLoading(false);
     }
-  }, [system]);
+  }, [system, campaignPrompt, characterPrompt]);
 
   useEffect(() => {
     generateInitialStory();
