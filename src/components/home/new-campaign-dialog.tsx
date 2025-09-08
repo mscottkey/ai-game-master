@@ -55,6 +55,8 @@ export function NewCampaignDialog() {
   
   const handleBack = () => {
     if (step === "setup") {
+      setCampaignPrompt("");
+      setCharacterPrompt("");
       setStep("system");
     }
   }
