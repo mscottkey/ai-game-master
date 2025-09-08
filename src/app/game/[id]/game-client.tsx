@@ -10,6 +10,12 @@ import {
 } from '@/ai/flows/dynamic-story-telling';
 import { generateImage } from '@/ai/flows/ai-generated-images';
 import { generateNpcs } from '@/ai/flows/generate-npcs';
+import { 
+  generateCharacter,
+  Dnd5eCharacter,
+  FateCharacter,
+  StarWarsCharacter,
+} from '@/ai/flows/generate-character';
 
 import { Header } from '@/components/game/header';
 import { VisualStoryBoard } from '@/components/game/visual-story-board';
@@ -25,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTTS } from '@/hooks/use-tts';
 
 type GameSystem = 'dnd5e' | 'fate' | 'starwars-ffg';
+type Character = Dnd5eCharacter | FateCharacter | StarWarsCharacter | null;
 
 const systemSettings: Record<GameSystem, { gameSetting: string; settingDescription: string; imagePromptPrefix: string }> = {
   'dnd5e': {
@@ -59,9 +66,10 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
   const [story, setStory] = useState('The adventure is about to begin...');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [npcs, setNpcs] = useState<Npc[]>([]);
+  const [character, setCharacter] = useState<Character>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isNpcLoading, setIsNpcLoading] = useState(false);
-  const [isInitialStoryLoading, setIsInitialStoryLoading] = useState(true);
+  const [isInitialLoading, setisInitialLoading] = useState(true);
 
   const activeSystemSettings = systemSettings[system] || systemSettings['dnd5e'];
 
@@ -147,20 +155,33 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
     }
   };
 
-  const generateInitialStory = useCallback(async () => {
-    setIsInitialStoryLoading(true);
+  const generateInitialState = useCallback(async () => {
+    setisInitialLoading(true);
     try {
-       const initialPlayerActions = campaignPrompt 
+      // Generate character and story in parallel
+      const characterPromise = characterPrompt 
+        ? generateCharacter({ characterPrompt, gameSystem: system })
+        : Promise.resolve(null);
+
+      const storyPromise = (async () => {
+        const initialPlayerActions = campaignPrompt 
           ? `The Game Master has set the scene: "${campaignPrompt}". The players' characters are present. One of them is described as: "${characterPrompt || 'A new adventurer'}". The players are ready to begin.`
           : 'The players have just gathered for the first time, seeking adventure.';
 
-       const storyInput: DynamicStoryTellingInput = {
-        gameSetting: activeSystemSettings.gameSetting,
-        playerActions: initialPlayerActions,
-        campaignHistory: 'This is the very beginning of the campaign.',
-      };
+        const storyInput: DynamicStoryTellingInput = {
+          gameSetting: activeSystemSettings.gameSetting,
+          playerActions: initialPlayerActions,
+          campaignHistory: 'This is the very beginning of the campaign.',
+        };
+        return dynamicStoryTelling(storyInput);
+      })();
+
+      const [characterResult, storyResult] = await Promise.all([characterPromise, storyPromise]);
       
-      const storyResult = await dynamicStoryTelling(storyInput);
+      if (characterResult) {
+        setCharacter(characterResult as Character);
+      }
+
       const initialMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -174,28 +195,33 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
       setImageUrl(imageResult.imageUrl);
 
     } catch (error) {
-      console.error("Initial story generation failed:", error);
+      console.error("Initial state generation failed:", error);
+      toast({
+        title: "Initialization Error",
+        description: "The AI Game Master failed to set the scene. Using default.",
+        variant: "destructive"
+      });
       setStory("Welcome, adventurers! Your journey begins now. Tell me, what do you do first?");
       setMessages([{ id: 'error-1', role: 'assistant', content: "The AI Game Master is currently asleep. Let's start with a default scenario." }]);
     } finally {
-      setIsInitialStoryLoading(false);
+      setisInitialLoading(false);
     }
   }, [system, campaignPrompt, characterPrompt]);
 
   useEffect(() => {
-    generateInitialStory();
-  }, [generateInitialStory]);
+    generateInitialState();
+  }, [generateInitialState]);
 
   const renderCharacterSheet = () => {
     switch (system) {
       case 'dnd5e':
-        return <CharacterSheetDnd5e />;
+        return <CharacterSheetDnd5e character={character as Dnd5eCharacter | null} isLoading={isInitialLoading} />;
       case 'fate':
-        return <CharacterSheetFate />;
+        return <CharacterSheetFate character={character as FateCharacter | null} isLoading={isInitialLoading} />;
       case 'starwars-ffg':
-        return <CharacterSheetStarWars />;
+        return <CharacterSheetStarWars character={character as StarWarsCharacter | null} isLoading={isInitialLoading} />;
       default:
-        return <CharacterSheetDnd5e />;
+        return <CharacterSheetDnd5e character={character as Dnd5eCharacter | null} isLoading={isInitialLoading} />;
     }
   };
 
@@ -224,7 +250,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
 
         {/* Center Panel */}
         <div className="flex flex-col col-span-1 lg:col-span-6 h-full overflow-hidden">
-           <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialStoryLoading} />
+           <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} />
            <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} />
         </div>
 

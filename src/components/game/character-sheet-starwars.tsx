@@ -1,33 +1,71 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { StarWarsCharacter } from "@/ai/flows/generate-character";
 
-const characteristics = [
-  { name: "Brawn", value: 3 },
-  { name: "Agility", value: 4 },
-  { name: "Intellect", value: 2 },
-  { name: "Cunning", value: 3 },
-  { name: "Willpower", value: 2 },
-  { name: "Presence", value: 2 },
-];
+interface CharacterSheetStarWarsProps {
+  character: StarWarsCharacter | null;
+  isLoading: boolean;
+}
 
-const skills = ["Gunnery", "Piloting (Space)", "Ranged (Heavy)"];
-const talents = ["Expert Tracker", "Grit"];
+export function CharacterSheetStarWars({ character, isLoading }: CharacterSheetStarWarsProps) {
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-1/2" />
+          <Skeleton className="h-4 w-3/4" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-3 gap-2">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+          </div>
+           <Separator />
+           <Skeleton className="h-10 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
 
-export function CharacterSheetStarWars() {
+  if (!character) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>No Character</CardTitle>
+          <CardDescription>Character data could not be loaded.</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  const characteristics = [
+      { name: "Brawn", value: character.characteristics.brawn },
+      { name: "Agility", value: character.characteristics.agility },
+      { name: "Intellect", value: character.characteristics.intellect },
+      { name: "Cunning", value: character.characteristics.cunning },
+      { name: "Willpower", value: character.characteristics.willpower },
+      { name: "Presence", value: character.characteristics.presence },
+  ];
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Zor-El</CardTitle>
-        <CardDescription>Trandoshan Bounty Hunter (Star Wars FFG)</CardDescription>
+        <CardTitle>{character.name}</CardTitle>
+        <CardDescription>{character.species} {character.career}</CardDescription>
         <div className="flex items-center gap-4 pt-2">
            <div className="flex items-center gap-2">
              <span>Wounds:</span>
-             <Badge>8 / 14</Badge>
+             <Badge>{character.wounds.current} / {character.wounds.threshold}</Badge>
            </div>
            <div className="flex items-center gap-2">
              <span>Strain:</span>
-             <Badge variant="secondary">5 / 12</Badge>
+             <Badge variant="secondary">{character.strain.current} / {character.strain.threshold}</Badge>
            </div>
         </div>
       </CardHeader>
@@ -47,16 +85,16 @@ export function CharacterSheetStarWars() {
         <div>
           <h4 className="font-semibold mb-2">Skills & Talents</h4>
           <div className="flex flex-wrap gap-2">
-            {skills.map(item => <Badge key={item}>{item}</Badge>)}
-            {talents.map(item => <Badge variant="outline" key={item}>{item}</Badge>)}
+            {character.skills.map(item => <Badge key={item}>{item}</Badge>)}
+            {character.talents.map(item => <Badge variant="outline" key={item}>{item}</Badge>)}
           </div>
         </div>
          <Separator />
         <div>
           <h4 className="font-semibold mb-2">Motivation & Obligation</h4>
           <p className="text-sm text-muted-foreground">
-            <strong>Motivation:</strong> Fame <br />
-            <strong>Obligation (10):</strong> Bounty
+            <strong>Motivation:</strong> {character.motivation} <br />
+            <strong>Obligation:</strong> {character.obligation}
           </p>
         </div>
       </CardContent>
