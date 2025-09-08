@@ -181,10 +181,10 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
     <div className="flex flex-col h-screen bg-background font-body">
       <Header gameId={gameId} />
       <main className="flex-1 flex flex-col overflow-hidden gap-4 p-4">
-        <div className="flex-shrink-0">
+        <div className="flex-[2_2_0%]">
             <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} />
         </div>
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
+        <div className="flex-[1_1_0%] grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
           <div className="lg:col-span-8 h-full">
             <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} characters={characters} isLocalPlay={true} />
           </div>
