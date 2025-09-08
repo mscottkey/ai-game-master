@@ -39,30 +39,42 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
   const [messages, setMessages] = useState<Message[]>([]);
   const [story, setStory] = useState('');
   const [imageUrl, setImageUrl] = useState<string>('');
+  const [characters, setCharacters] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
+  useEffect(() => {
+    if (characterPrompt) {
+      // Split by newline and filter out empty lines
+      const initialCharacters = characterPrompt.split('\n').map(c => c.trim().replace(/^-/, '').trim()).filter(Boolean);
+      setCharacters(initialCharacters);
+    }
+  }, [characterPrompt]);
+
   const activeSystemSettings = systemSettings[system] || systemSettings['dnd5e'];
 
-  const handleSendMessage = async (content: string, mode: MessageMode) => {
+  const handleSendMessage = async (content: string, mode: MessageMode, character?: string) => {
     if (isLoading) return;
+
+    const playerMessageContent = character ? `${character}: ${content}` : content;
 
     const newPlayerMessage: Message = {
       id: crypto.randomUUID(),
       role: 'user',
-      content,
+      content: playerMessageContent,
     };
     setMessages((prev) => [...prev, newPlayerMessage]);
     setIsLoading(true);
 
     if (mode === 'in-character') {
-      setStory((prev) => `${prev}\n\n> **Player:** ${content}`);
+      const storyUpdate = character ? `> **${playerMessageContent}**` : `> **Player:** ${content}`;
+      setStory((prev) => `${prev}\n\n${storyUpdate}`);
     }
 
     try {
       const storyInput: DynamicStoryTellingInput = {
         gameSetting: activeSystemSettings.gameSetting,
-        playerActions: content,
+        playerActions: playerMessageContent, // Send combined content to AI
         campaignHistory: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
         messageType: mode,
       };
@@ -155,6 +167,15 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
     generateInitialState();
   }, [generateInitialState]);
 
+  const handleAddCharacter = (name: string) => {
+    if (name && !characters.includes(name)) {
+      setCharacters(prev => [...prev, name]);
+    }
+  };
+
+  const handleRemoveCharacter = (name: string) => {
+    setCharacters(prev => prev.filter(c => c !== name));
+  };
 
   return (
     <div className="flex flex-col h-screen bg-background font-body">
@@ -165,10 +186,14 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
         </div>
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
           <div className="lg:col-span-8 h-full">
-            <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} />
+            <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} characters={characters} isLocalPlay={true} />
           </div>
           <div className="hidden lg:flex lg:col-span-4 h-full">
-            <ActionTracker characterPrompt={characterPrompt} />
+            <ActionTracker 
+              characters={characters}
+              onAddCharacter={handleAddCharacter}
+              onRemoveCharacter={handleRemoveCharacter}
+            />
           </div>
         </div>
       </main>

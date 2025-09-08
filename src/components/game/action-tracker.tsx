@@ -1,34 +1,77 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ListTodo, User } from "lucide-react";
+import { ListTodo, User, Plus, X } from "lucide-react";
+import { useState } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 interface ActionTrackerProps {
-  characterPrompt?: string;
+  characters: string[];
+  onAddCharacter: (name: string) => void;
+  onRemoveCharacter: (name: string) => void;
 }
 
-export function ActionTracker({ characterPrompt }: ActionTrackerProps) {
+export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter }: ActionTrackerProps) {
+  const [newCharacterName, setNewCharacterName] = useState("");
+
+  const handleAddClick = () => {
+    if (newCharacterName.trim()) {
+      onAddCharacter(newCharacterName.trim());
+      setNewCharacterName("");
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleAddClick();
+    }
+  };
+
   return (
-    <Card>
+    <Card className="flex flex-col w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ListTodo className="w-5 h-5" />
           Action Tracker
         </CardTitle>
         <CardDescription>
-          What's happening and who's next.
+          The characters in the current scene.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        {characterPrompt ? (
-          <div>
-            <h4 className="font-semibold mb-2 flex items-center gap-2"><User className="w-4 h-4" /> Player Characters</h4>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap bg-secondary p-3 rounded-md">{characterPrompt}</p>
-          </div>
-        ) : (
-          <div className="text-center text-sm text-muted-foreground py-4">
-            <p>The scene is being set...</p>
-            <p>The Game Master will guide the action.</p>
-          </div>
-        )}
+      <CardContent className="flex-1 flex flex-col gap-4">
+        <div className="flex gap-2">
+          <Input
+            placeholder="New character name..."
+            value={newCharacterName}
+            onChange={(e) => setNewCharacterName(e.target.value)}
+            onKeyPress={handleKeyPress}
+          />
+          <Button onClick={handleAddClick} size="icon">
+            <Plus />
+            <span className="sr-only">Add Character</span>
+          </Button>
+        </div>
+        <div className="flex-1 space-y-2 overflow-y-auto">
+          {characters.length > 0 ? (
+            characters.map(character => (
+              <div key={character} className="flex items-center justify-between p-2 bg-secondary rounded-md text-sm">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  <span>{character}</span>
+                </div>
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onRemoveCharacter(character)}>
+                  <X className="w-4 h-4" />
+                   <span className="sr-only">Remove {character}</span>
+                </Button>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-sm text-muted-foreground py-4">
+              <p>No characters in the scene.</p>
+              <p>Add some characters to get started!</p>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
