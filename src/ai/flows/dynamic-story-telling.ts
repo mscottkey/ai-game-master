@@ -13,13 +13,14 @@ import {z} from 'genkit';
 
 const DynamicStoryTellingInputSchema = z.object({
   gameSetting: z.string().describe('The setting for the game, including genre, theme, and world details.'),
-  playerActions: z.string().describe('A description of the player actions.'),
+  playerActions: z.string().describe('A description of the player actions or questions.'),
   campaignHistory: z.string().describe('A summary of the campaign history.'),
+  messageType: z.enum(['in-character', 'out-of-character']).describe('The type of message from the player.'),
 });
 export type DynamicStoryTellingInput = z.infer<typeof DynamicStoryTellingInputSchema>;
 
 const DynamicStoryTellingOutputSchema = z.object({
-  narrative: z.string().describe('The generated narrative based on the game setting, player actions, and campaign history.'),
+  narrative: z.string().describe('The generated narrative or response based on the game setting, player actions, and campaign history.'),
 });
 export type DynamicStoryTellingOutput = z.infer<typeof DynamicStoryTellingOutputSchema>;
 
@@ -33,16 +34,24 @@ const prompt = ai.definePrompt({
   output: {schema: DynamicStoryTellingOutputSchema},
   prompt: `You are an AI Game Master, tasked with generating a dynamic and engaging storyline for a tabletop RPG.
 
-  The game is set in the following setting:
-  {{gameSetting}}
+The game is set in the following setting:
+{{gameSetting}}
 
-  The players have taken the following actions:
-  {{playerActions}}
+The campaign history so far is:
+{{campaignHistory}}
 
-  The campaign history so far is:
-  {{campaignHistory}}
+{{#if (eq messageType "in-character")}}
+The player takes the following action in-character:
+"{{playerActions}}"
 
-  Generate a narrative that builds upon the setting, player actions, and campaign history, creating a compelling and unpredictable story for the players to experience.`,
+Generate a narrative that builds upon the setting, player actions, and campaign history, creating a compelling and unpredictable story for the players to experience. This should advance the plot.
+{{else}}
+The player asks the following question out-of-character, as a player to the Game Master:
+"{{playerActions}}"
+
+Answer the player's question helpfully as the GM. Do not treat this as a character action and do not advance the main story narrative. You can clarify rules, describe the scene in more detail, or provide hints if appropriate.
+{{/if}}
+`,
 });
 
 const dynamicStoryTellingFlow = ai.defineFlow(

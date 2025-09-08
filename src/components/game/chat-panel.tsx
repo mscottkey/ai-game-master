@@ -5,18 +5,24 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Loader2, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '../ui/card';
+import { Switch } from '../ui/switch';
+import { Label } from '../ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+
+type MessageMode = 'in-character' | 'out-of-character';
 
 type ChatPanelProps = {
   messages: Message[];
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string, mode: MessageMode) => void;
   isLoading: boolean;
 };
 
 export function ChatPanel({ messages, onSendMessage, isLoading }: ChatPanelProps) {
   const [input, setInput] = useState('');
+  const [mode, setMode] = useState<MessageMode>('in-character');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,7 +37,7 @@ export function ChatPanel({ messages, onSendMessage, isLoading }: ChatPanelProps
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
-      onSendMessage(input.trim());
+      onSendMessage(input.trim(), mode);
       setInput('');
     }
   };
@@ -83,12 +89,31 @@ export function ChatPanel({ messages, onSendMessage, isLoading }: ChatPanelProps
           )}
         </div>
       </ScrollArea>
-      <div className="p-4 border-t">
+      <div className="p-4 border-t space-y-2">
+        <div className="flex items-center justify-end space-x-2">
+          <Label htmlFor="message-mode" className="text-sm text-muted-foreground">
+            {mode === 'in-character' ? 'In-Character Action' : 'Out-of-Character Question'}
+          </Label>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Switch 
+                  id="message-mode" 
+                  checked={mode === 'out-of-character'}
+                  onCheckedChange={(checked) => setMode(checked ? 'out-of-character' : 'in-character')}
+                />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Toggle to ask the GM a question directly without your character taking an action.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         <form onSubmit={handleSubmit} className="flex gap-2">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="What do you do?"
+            placeholder={mode === 'in-character' ? 'What do you do?' : 'Ask the GM anything...'}
             disabled={isLoading}
             autoComplete="off"
           />

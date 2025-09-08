@@ -15,6 +15,7 @@ import { VisualStoryBoard } from '@/components/game/visual-story-board';
 import { ChatPanel } from '@/components/game/chat-panel';
 
 type GameSystem = 'dnd5e' | 'fate' | 'starwars-ffg';
+type MessageMode = 'in-character' | 'out-of-character';
 
 const systemSettings: Record<GameSystem, { gameSetting: string; imagePromptPrefix: string }> = {
   'dnd5e': {
@@ -42,7 +43,7 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
 
   const activeSystemSettings = systemSettings[system] || systemSettings['dnd5e'];
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, mode: MessageMode) => {
     if (isLoading) return;
 
     const newPlayerMessage: Message = {
@@ -58,6 +59,7 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
         gameSetting: activeSystemSettings.gameSetting,
         playerActions: content,
         campaignHistory: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
+        messageType: mode,
       };
       
       const storyResult = await dynamicStoryTelling(storyInput);
@@ -68,20 +70,22 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
         content: storyResult.narrative,
       };
       setMessages((prev) => [...prev, newAssistantMessage]);
-      setStory(storyResult.narrative);
 
-      // Generate image in parallel
-      generateImage({ prompt: `${activeSystemSettings.imagePromptPrefix} ${storyResult.narrative}` })
-        .then(imageResult => setImageUrl(imageResult.imageUrl))
-        .catch(err => {
-          console.error("Image generation failed:", err);
-          toast({
-            title: "Image Generation Error",
-            description: "Could not generate a new scene image.",
-            variant: "destructive"
+      if (mode === 'in-character') {
+        setStory(storyResult.narrative);
+
+        // Generate image in parallel
+        generateImage({ prompt: `${activeSystemSettings.imagePromptPrefix} ${storyResult.narrative}` })
+          .then(imageResult => setImageUrl(imageResult.imageUrl))
+          .catch(err => {
+            console.error("Image generation failed:", err);
+            toast({
+              title: "Image Generation Error",
+              description: "Could not generate a new scene image.",
+              variant: "destructive"
+            });
           });
-        });
-
+      }
     } catch (error) {
       console.error("Story generation failed:", error);
       toast({
@@ -111,6 +115,7 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
         gameSetting: activeSystemSettings.gameSetting,
         playerActions: initialPlayerActions,
         campaignHistory: 'This is the very beginning of the campaign.',
+        messageType: 'in-character',
       };
       
       const storyResult = await dynamicStoryTelling(storyInput);
