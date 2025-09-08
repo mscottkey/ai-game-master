@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import Link from "next/link";
 
 type HeaderProps = {
   gameId: string;
@@ -7,9 +8,11 @@ type HeaderProps = {
 export function Header({ gameId }: HeaderProps) {
   return (
     <header className="flex items-center justify-between p-4 border-b border-border shadow-md shrink-0">
-      <h1 className="text-xl font-headline font-bold text-accent neon-glow">
-        RolePlai
-      </h1>
+      <Link href="/">
+        <h1 className="text-xl font-headline font-bold text-accent neon-glow">
+          RolePlai
+        </h1>
+      </Link>
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground">Session:</span>
         <Badge variant="outline">{gameId}</Badge>
