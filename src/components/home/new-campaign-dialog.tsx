@@ -16,8 +16,8 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Swords, ArrowRight, ArrowLeft } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Swords, ArrowRight, ArrowLeft, Dices } from "lucide-react";
+import { generatePrompt, systemPlaceholders } from "@/lib/prompt-generator";
 
 const gameSystems = [
   {
@@ -37,22 +37,6 @@ const gameSystems = [
   },
 ];
 
-const systemPlaceholders: Record<string, { campaign: string; character: string }> = {
-  dnd5e: {
-    campaign: "A group of mercenaries are hired to investigate strange disappearances in the cursed forest of Eldwood.",
-    character: "A grizzled dwarf warrior with a mysterious past, seeking redemption for a forgotten failure.",
-  },
-  fate: {
-    campaign: "In the rain-slicked streets of a noir city, a mysterious client offers a job that's too good to be true, drawing you into a web of conspiracy.",
-    character: "A hardboiled private eye with a troubled past and a knack for finding trouble where it's darkest.",
-  },
-  "starwars-ffg": {
-    campaign: "A group of smugglers on the Outer Rim take on a risky job for a shadowy client, promising a big payout but attracting Imperial attention.",
-    character: "A cynical Twi'lek pilot who owes a debt to a Hutt and is just trying to score one last big job to get free.",
-  },
-};
-
-
 type Step = "system" | "setup";
 
 export function NewCampaignDialog() {
@@ -61,8 +45,6 @@ export function NewCampaignDialog() {
   const [campaignPrompt, setCampaignPrompt] = useState("");
   const [characterPrompt, setCharacterPrompt] = useState("");
 
-  // A new game ID is generated each time the dialog is opened.
-  // This is memoized to prevent it from changing on re-renders.
   const newGameId = `session-${crypto.randomUUID().split('-')[0]}`;
 
   const handleNext = () => {
@@ -75,6 +57,14 @@ export function NewCampaignDialog() {
     if (step === "setup") {
       setStep("system");
     }
+  }
+
+  const handleRandomizeCampaign = () => {
+    setCampaignPrompt(generatePrompt(selectedSystem, 'campaign'));
+  }
+
+  const handleRandomizeCharacter = () => {
+    setCharacterPrompt(generatePrompt(selectedSystem, 'character'));
   }
 
   const getStartLink = () => {
@@ -144,24 +134,34 @@ export function NewCampaignDialog() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="campaign-prompt">Campaign Prompt</Label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="campaign-prompt">Campaign Prompt</Label>
+                  <Button variant="ghost" size="sm" onClick={handleRandomizeCampaign}>
+                    <Dices className="mr-2 h-4 w-4" />
+                    Randomize
+                  </Button>
+                </div>
                 <Textarea
                   id="campaign-prompt"
                   value={campaignPrompt}
                   onChange={(e) => setCampaignPrompt(e.target.value)}
                   placeholder={systemPlaceholders[selectedSystem]?.campaign || "Describe the starting scene..."}
-                  className="mt-2"
                 />
               </div>
-               <div>
-                <Label htmlFor="character-prompt">Your Character</Label>
+               <div className="space-y-2">
+                 <div className="flex items-center justify-between">
+                    <Label htmlFor="character-prompt">Your Character</Label>
+                     <Button variant="ghost" size="sm" onClick={handleRandomizeCharacter}>
+                      <Dices className="mr-2 h-4 w-4" />
+                      Randomize
+                    </Button>
+                 </div>
                 <Textarea
                   id="character-prompt"
                   value={characterPrompt}
                   onChange={(e) => setCharacterPrompt(e.target.value)}
                   placeholder={systemPlaceholders[selectedSystem]?.character || "Describe your character..."}
-                  className="mt-2"
                 />
               </div>
             </div>
