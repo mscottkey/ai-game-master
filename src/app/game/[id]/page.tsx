@@ -4,6 +4,7 @@
 import { useState, use } from 'react';
 import { GameClient } from './game-client';
 import { CharacterCreationClient } from './character-creation-client';
+import { LocalPlayClient } from './local-play-client';
 
 type GameState = 'character-creation' | 'in-progress';
 
@@ -14,7 +15,8 @@ type GamePageProps = {
   searchParams: Promise<{ 
     system?: string,
     campaign?: string,
-    character?: string 
+    character?: string,
+    local?: string
   }>;
 }
 
@@ -41,6 +43,10 @@ export default function GamePage({
     campaignPrompt: searchParams.campaign,
     characterPrompt: searchParams.character,
   };
+
+  if (searchParams.local === 'true') {
+    return <LocalPlayClient {...gameProps} />;
+  }
 
   switch (gameState) {
     case 'character-creation':

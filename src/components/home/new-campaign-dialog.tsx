@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Swords, ArrowRight, ArrowLeft, Dices } from "lucide-react";
 import { generatePrompt, systemPlaceholders } from "@/lib/prompt-generator";
+import { Switch } from "../ui/switch";
 
 const gameSystems = [
   {
@@ -44,6 +45,7 @@ export function NewCampaignDialog() {
   const [selectedSystem, setSelectedSystem] = useState<string>("dnd5e");
   const [campaignPrompt, setCampaignPrompt] = useState("");
   const [characterPrompt, setCharacterPrompt] = useState("");
+  const [localPlay, setLocalPlay] = useState(false);
 
   const newGameId = `session-${crypto.randomUUID().split('-')[0]}`;
 
@@ -77,6 +79,9 @@ export function NewCampaignDialog() {
     }
     if (characterPrompt) {
       params.set("character", characterPrompt);
+    }
+    if (localPlay) {
+      params.set("local", "true");
     }
     return `/game/${newGameId}?${params.toString()}`;
   }
@@ -165,6 +170,10 @@ export function NewCampaignDialog() {
                   onChange={(e) => setCharacterPrompt(e.target.value)}
                   placeholder={systemPlaceholders[selectedSystem]?.character || "Describe your character..."}
                 />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch id="local-play-mode" checked={localPlay} onCheckedChange={setLocalPlay} />
+                <Label htmlFor="local-play-mode">Local Play Mode</Label>
               </div>
             </div>
             <DialogFooter className="flex justify-between w-full">
