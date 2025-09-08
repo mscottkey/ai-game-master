@@ -25,6 +25,24 @@ import { useTTS } from '@/hooks/use-tts';
 
 type GameSystem = 'dnd5e' | 'fate' | 'starwars-ffg';
 
+const systemSettings: Record<GameSystem, { gameSetting: string; settingDescription: string; imagePromptPrefix: string }> = {
+  'dnd5e': {
+    gameSetting: 'A high-fantasy world named Eldoria, governed by the rules of Dungeons & Dragons 5th Edition. The players are in a tavern called The Sleeping Dragon.',
+    settingDescription: 'A bustling fantasy city tavern in Eldoria, filled with adventurers, merchants, and minstrels, adhering to D&D 5e lore.',
+    imagePromptPrefix: 'Fantasy RPG illustration, cinematic,'
+  },
+  'fate': {
+    gameSetting: 'A gritty noir city named Crescent Bay in the 1940s, using the FATE Core system. The players are private investigators meeting in a dimly lit jazz club called The Blue Note.',
+    settingDescription: 'A smoky, dimly lit 1940s noir jazz club in Crescent Bay, filled with femme fatales, gruff detectives, and shady informants, fitting a FATE Core narrative.',
+    imagePromptPrefix: '1940s noir film illustration, cinematic,'
+  },
+  'starwars-ffg': {
+    gameSetting: 'The Outer Rim of the Star Wars galaxy, using the Fantasy Flight Games (FFG) narrative dice system. The players are a rag-tag crew of smugglers and mercenaries meeting in a cantina on Tatooine called the Dusty Spire.',
+    settingDescription: 'A classic Star Wars cantina on a dusty Outer Rim planet, bustling with aliens, bounty hunters, and smugglers, as seen in the FFG rule system.',
+    imagePromptPrefix: 'Star Wars concept art, cinematic,'
+  },
+};
+
 export function GameClient({ gameId, system }: { gameId: string, system: GameSystem }) {
   const { toast } = useToast();
   const { speak, isSpeaking } = useTTS();
@@ -36,6 +54,8 @@ export function GameClient({ gameId, system }: { gameId: string, system: GameSys
   const [isLoading, setIsLoading] = useState(false);
   const [isNpcLoading, setIsNpcLoading] = useState(false);
   const [isInitialStoryLoading, setIsInitialStoryLoading] = useState(true);
+
+  const activeSystemSettings = systemSettings[system] || systemSettings['dnd5e'];
 
   const handleSendMessage = async (content: string) => {
     if (isLoading) return;
@@ -50,7 +70,7 @@ export function GameClient({ gameId, system }: { gameId: string, system: GameSys
 
     try {
       const storyInput: DynamicStoryTellingInput = {
-        gameSetting: 'A high-fantasy world teetering on the brink of a magical war.',
+        gameSetting: activeSystemSettings.gameSetting,
         playerActions: content,
         campaignHistory: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
       };
@@ -66,7 +86,7 @@ export function GameClient({ gameId, system }: { gameId: string, system: GameSys
       setStory(storyResult.narrative);
 
       // Generate image in parallel
-      generateImage({ prompt: `Fantasy RPG illustration, cinematic, ${storyResult.narrative}` })
+      generateImage({ prompt: `${activeSystemSettings.imagePromptPrefix} ${storyResult.narrative}` })
         .then(imageResult => setImageUrl(imageResult.imageUrl))
         .catch(err => {
           console.error("Image generation failed:", err);
@@ -99,7 +119,7 @@ export function GameClient({ gameId, system }: { gameId: string, system: GameSys
     setIsNpcLoading(true);
     try {
       const newNpcs = await generateNpcs({
-        settingDescription: 'A bustling fantasy city tavern called The Prancing Pony.',
+        settingDescription: activeSystemSettings.settingDescription,
         numNPCs: 3,
       });
       setNpcs((prev) => [...prev, ...newNpcs]);
@@ -123,8 +143,8 @@ export function GameClient({ gameId, system }: { gameId: string, system: GameSys
     setIsInitialStoryLoading(true);
     try {
        const storyInput: DynamicStoryTellingInput = {
-        gameSetting: 'A high-fantasy world named Eldoria. The players are in a tavern called The Sleeping Dragon.',
-        playerActions: 'The players have just gathered for the first time, seeking fame and fortune.',
+        gameSetting: activeSystemSettings.gameSetting,
+        playerActions: 'The players have just gathered for the first time, seeking adventure.',
         campaignHistory: 'This is the very beginning of the campaign.',
       };
       
@@ -138,7 +158,7 @@ export function GameClient({ gameId, system }: { gameId: string, system: GameSys
       setMessages([initialMessage]);
       setStory(storyResult.narrative);
       
-      const imageResult = await generateImage({ prompt: `Fantasy RPG tavern interior, cinematic, adventurers meeting. ${storyResult.narrative}` });
+      const imageResult = await generateImage({ prompt: `${activeSystemSettings.imagePromptPrefix} adventurers meeting. ${storyResult.narrative}` });
       setImageUrl(imageResult.imageUrl);
 
     } catch (error) {
@@ -148,7 +168,7 @@ export function GameClient({ gameId, system }: { gameId: string, system: GameSys
     } finally {
       setIsInitialStoryLoading(false);
     }
-  }, []);
+  }, [system]);
 
   useEffect(() => {
     generateInitialStory();
