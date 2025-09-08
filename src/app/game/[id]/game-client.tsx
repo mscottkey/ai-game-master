@@ -52,7 +52,7 @@ const systemSettings: Record<GameSystem, { gameSetting: string; settingDescripti
   },
 };
 
-interface GameClientProps {
+export interface GameClientProps {
   gameId: string;
   system: GameSystem;
   campaignPrompt?: string;
