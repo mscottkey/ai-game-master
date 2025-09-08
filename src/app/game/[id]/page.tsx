@@ -8,7 +8,7 @@ import { CharacterCreationClient } from './character-creation-client';
 type GameState = 'initializing' | 'character-creation' | 'in-progress';
 
 export default function GamePage({
-  params: { id },
+  params,
   searchParams,
 }: {
   params: { id: string };
@@ -18,6 +18,7 @@ export default function GamePage({
     character?: string 
   };
 }) {
+  const { id } = params;
   const [gameState, setGameState] = useState<GameState>('character-creation');
 
   // For now, we'll just have a simple button to move from creation to gameplay
