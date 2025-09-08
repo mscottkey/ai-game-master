@@ -65,7 +65,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
   const { speak, isSpeaking } = useTTS();
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const [story, setStory] = useState('The adventure is about to begin...');
+  const [story, setStory] = useState('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [npcs, setNpcs] = useState<Npc[]>([]);
   const [character, setCharacter] = useState<Character>(null);
@@ -86,6 +86,10 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
     setMessages((prev) => [...prev, newPlayerMessage]);
     setIsLoading(true);
 
+    if (mode === 'in-character') {
+      setStory((prev) => `${prev}\n\n> **Player:** ${content}`);
+    }
+
     try {
       const storyInput: DynamicStoryTellingInput = {
         gameSetting: activeSystemSettings.gameSetting,
@@ -104,7 +108,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
       setMessages((prev) => [...prev, newAssistantMessage]);
 
       if (mode === 'in-character') {
-        setStory(storyResult.narrative);
+        setStory((prev) => `${prev}\n\n**GM:** ${storyResult.narrative}`);
 
         // Generate image in parallel only for in-character actions that advance the story
         generateImage({ prompt: `${activeSystemSettings.imagePromptPrefix} ${storyResult.narrative}` })
@@ -195,7 +199,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
       };
 
       setMessages([initialMessage]);
-      setStory(storyResult.narrative);
+      setStory(`**GM:** ${storyResult.narrative}`);
       
       const imageResult = await generateImage({ prompt: `${activeSystemSettings.imagePromptPrefix} adventurers meeting. ${storyResult.narrative}` });
       setImageUrl(imageResult.imageUrl);
@@ -207,7 +211,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
         description: "The AI Game Master failed to set the scene. Using default.",
         variant: "destructive"
       });
-      setStory("Welcome, adventurers! Your journey begins now. Tell me, what do you do first?");
+      setStory("**GM:** Welcome, adventurers! Your journey begins now. Tell me, what do you do first?");
       setMessages([{ id: 'error-1', role: 'assistant', content: "The AI Game Master is currently asleep. Let's start with a default scenario." }]);
     } finally {
       setisInitialLoading(false);
