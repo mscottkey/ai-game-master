@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { StarWarsCharacter } from "@/ai/flows/generate-character";
+import type { StarWarsCharacter } from "@/ai/flows/generate-character.types";
 
 interface CharacterSheetStarWarsProps {
   character: StarWarsCharacter | null;

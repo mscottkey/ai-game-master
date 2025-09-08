@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Shield, Swords, Wand2, Heart, Star, Book } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Dnd5eCharacter } from "@/ai/flows/generate-character";
+import type { Dnd5eCharacter } from "@/ai/flows/generate-character.types";
 
 interface CharacterSheetDnd5eProps {
   character: Dnd5eCharacter | null;

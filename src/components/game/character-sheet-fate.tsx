@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { FateCharacter } from "@/ai/flows/generate-character";
+import type { FateCharacter } from "@/ai/flows/generate-character.types";
 
 interface CharacterSheetFateProps {
   character: FateCharacter | null;

@@ -10,12 +10,12 @@ import {
 } from '@/ai/flows/dynamic-story-telling';
 import { generateImage } from '@/ai/flows/ai-generated-images';
 import { generateNpcs } from '@/ai/flows/generate-npcs';
-import { 
-  generateCharacter,
+import { generateCharacter } from '@/ai/flows/generate-character';
+import type { 
   Dnd5eCharacter,
   FateCharacter,
   StarWarsCharacter,
-} from '@/ai/flows/generate-character';
+} from '@/ai/flows/generate-character.types';
 
 import { Header } from '@/components/game/header';
 import { VisualStoryBoard } from '@/components/game/visual-story-board';
@@ -206,7 +206,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
     } finally {
       setisInitialLoading(false);
     }
-  }, [system, campaignPrompt, characterPrompt]);
+  }, [system, campaignPrompt, characterPrompt, toast, activeSystemSettings]);
 
   useEffect(() => {
     generateInitialState();
