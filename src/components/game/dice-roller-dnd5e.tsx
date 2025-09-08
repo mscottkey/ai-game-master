@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Dices } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const diceTypes = [4, 6, 8, 10, 12, 20];
+const diceTypes = [4, 6, 8, 10, 12, 20, 100];
 
-export function DiceRoller() {
+export function DiceRollerDnd5e() {
   const [result, setResult] = useState<number | null>(null);
   const [dice, setDice] = useState<number | null>(null);
   const [rolling, setRolling] = useState(false);
@@ -30,7 +30,7 @@ export function DiceRoller() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Dices className="w-5 h-5" />
-          Dice Roller
+          Dice Roller (D&D 5e)
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-4">
@@ -46,7 +46,7 @@ export function DiceRoller() {
             {result ?? '?'}
           </span>
         </div>
-        <div className="grid grid-cols-3 gap-2 w-full">
+        <div className="grid grid-cols-4 gap-2 w-full">
           {diceTypes.map((sides) => (
             <Button
               key={sides}

@@ -13,13 +13,19 @@ import { generateNpcs } from '@/ai/flows/generate-npcs';
 import { Header } from '@/components/game/header';
 import { VisualStoryBoard } from '@/components/game/visual-story-board';
 import { ChatPanel } from '@/components/game/chat-panel';
-import { CharacterSheet } from '@/components/game/character-sheet';
-import { DiceRoller } from '@/components/game/dice-roller';
+import { DiceRollerDnd5e } from '@/components/game/dice-roller-dnd5e';
+import { DiceRollerFate } from '@/components/game/dice-roller-fate';
+import { DiceRollerStarWars } from '@/components/game/dice-roller-starwars';
+import { CharacterSheetDnd5e } from '@/components/game/character-sheet-dnd5e';
+import { CharacterSheetFate } from '@/components/game/character-sheet-fate';
+import { CharacterSheetStarWars } from '@/components/game/character-sheet-starwars';
 import { NpcPanel } from '@/components/game/npc-panel';
 import { useToast } from '@/hooks/use-toast';
 import { useTTS } from '@/hooks/use-tts';
 
-export function GameClient({ gameId }: { gameId: string }) {
+type GameSystem = 'dnd5e' | 'fate' | 'starwars-ffg';
+
+export function GameClient({ gameId, system }: { gameId: string, system: GameSystem }) {
   const { toast } = useToast();
   const { speak, isSpeaking } = useTTS();
 
@@ -148,13 +154,39 @@ export function GameClient({ gameId }: { gameId: string }) {
     generateInitialStory();
   }, [generateInitialStory]);
 
+  const renderCharacterSheet = () => {
+    switch (system) {
+      case 'dnd5e':
+        return <CharacterSheetDnd5e />;
+      case 'fate':
+        return <CharacterSheetFate />;
+      case 'starwars-ffg':
+        return <CharacterSheetStarWars />;
+      default:
+        return <CharacterSheetDnd5e />;
+    }
+  };
+
+  const renderDiceRoller = () => {
+    switch (system) {
+      case 'dnd5e':
+        return <DiceRollerDnd5e />;
+      case 'fate':
+        return <DiceRollerFate />;
+      case 'starwars-ffg':
+        return <DiceRollerStarWars />;
+      default:
+        return <DiceRollerDnd5e />;
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background font-body">
       <Header gameId={gameId} />
       <main className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-4 p-4">
         {/* Left Panel */}
         <div className="hidden lg:flex lg:flex-col lg:col-span-3 gap-4 overflow-y-auto">
-          <CharacterSheet />
+          {renderCharacterSheet()}
           <NpcPanel npcs={npcs} onGenerateNpcs={handleGenerateNpcs} isLoading={isNpcLoading} speak={speak} />
         </div>
 
@@ -166,7 +198,7 @@ export function GameClient({ gameId }: { gameId: string }) {
 
         {/* Right Panel */}
         <div className="hidden lg:flex lg:flex-col lg:col-span-3 gap-4 overflow-y-auto">
-          <DiceRoller />
+          {renderDiceRoller()}
         </div>
       </main>
     </div>

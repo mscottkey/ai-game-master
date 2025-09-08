@@ -12,12 +12,12 @@ const stats = [
 const inventory = ["Health Potion", "Rope (50ft)", "Ancient Scroll"];
 const abilities = ["Fireball", "Inspiring Word"];
 
-export function CharacterSheet() {
+export function CharacterSheetDnd5e() {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Kaelen, the Bold</CardTitle>
-        <CardDescription>Level 5 Human Paladin</CardDescription>
+        <CardDescription>Level 5 Human Paladin (D&D 5e)</CardDescription>
         <div className="flex items-center gap-4 pt-2">
            <div className="flex items-center gap-2 text-red-400">
              <Heart className="w-4 h-4"/>
