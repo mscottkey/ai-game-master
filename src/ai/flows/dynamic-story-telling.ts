@@ -41,13 +41,13 @@ The game is set in the following setting:
 The campaign history so far is:
 {{campaignHistory}}
 
-{{#if (eq messageType "in-character")}}
+{{#if messageType.in-character}}
 The player takes the following action in-character:
 "{{playerActions}}"
 
 Generate a narrative that builds upon the setting, player actions, and campaign history, creating a compelling and unpredictable story for the players to experience. This should advance the plot.
 {{/if}}
-{{#if (eq messageType "out-of-character")}}
+{{#if messageType.out-of-character}}
 The player asks the following question out-of-character, as a player to the Game Master:
 "{{playerActions}}"
 
@@ -62,8 +62,16 @@ const dynamicStoryTellingFlow = ai.defineFlow(
     inputSchema: DynamicStoryTellingInputSchema,
     outputSchema: DynamicStoryTellingOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    // Reshape the input to work with simple Handlebars #if blocks.
+    const templatingInput = {
+      ...input,
+      messageType: {
+        'in-character': input.messageType === 'in-character',
+        'out-of-character': input.messageType === 'out-of-character',
+      },
+    };
+    const {output} = await prompt(templatingInput);
     return output!;
   }
 );
