@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Bot, User, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Card } from '../ui/card';
 
 type ChatPanelProps = {
   messages: Message[];
@@ -36,7 +37,7 @@ export function ChatPanel({ messages, onSendMessage, isLoading }: ChatPanelProps
   };
 
   return (
-    <div className="flex flex-col flex-1 bg-card border rounded-t-none h-1/2">
+    <Card className="flex flex-col flex-1 h-1/2">
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-4">
           {messages.map((m) => (
@@ -101,6 +102,6 @@ export function ChatPanel({ messages, onSendMessage, isLoading }: ChatPanelProps
           </Button>
         </form>
       </div>
-    </div>
+    </Card>
   );
 }

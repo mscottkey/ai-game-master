@@ -11,7 +11,7 @@ type VisualStoryBoardProps = {
 
 export function VisualStoryBoard({ story, imageUrl, isLoading }: VisualStoryBoardProps) {
   return (
-    <Card className="flex-shrink-0 flex flex-col h-1/2 border-b-0 rounded-b-none">
+    <Card className="flex-shrink-0 flex flex-col h-1/2">
       <div className="relative w-full h-3/5">
         {isLoading ? (
           <div className="w-full h-full bg-secondary rounded-t-lg flex items-center justify-center">

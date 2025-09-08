@@ -27,6 +27,7 @@ import { CharacterSheetDnd5e } from '@/components/game/character-sheet-dnd5e';
 import { CharacterSheetFate } from '@/components/game/character-sheet-fate';
 import { CharacterSheetStarWars } from '@/components/game/character-sheet-starwars';
 import { NpcPanel } from '@/components/game/npc-panel';
+import { ActionTracker } from '@/components/game/action-tracker';
 import { useToast } from '@/hooks/use-toast';
 import { useTTS } from '@/hooks/use-tts';
 
@@ -249,7 +250,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
         </div>
 
         {/* Center Panel */}
-        <div className="flex flex-col col-span-1 lg:col-span-6 h-full overflow-hidden">
+        <div className="flex flex-col col-span-1 lg:col-span-6 h-full overflow-hidden gap-4">
            <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} />
            <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} />
         </div>
@@ -257,6 +258,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
         {/* Right Panel */}
         <div className="hidden lg:flex lg:flex-col lg:col-span-3 gap-4 overflow-y-auto">
           {renderDiceRoller()}
+          <ActionTracker />
         </div>
       </main>
     </div>
