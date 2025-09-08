@@ -13,6 +13,7 @@ import type { GameClientProps } from './game-client';
 import { Header } from '@/components/game/header';
 import { VisualStoryBoard } from '@/components/game/visual-story-board';
 import { ChatPanel } from '@/components/game/chat-panel';
+import { ActionTracker } from '@/components/game/action-tracker';
 
 type GameSystem = 'dnd5e' | 'fate' | 'starwars-ffg';
 type MessageMode = 'in-character' | 'out-of-character';
@@ -112,8 +113,8 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
     setIsInitialLoading(true);
     try {
       const initialPlayerActions = campaignPrompt 
-        ? `The Game Master has set the scene: "${campaignPrompt}". The players' characters are present. One of them is described as: "${characterPrompt || 'A new adventurer'}". The players are ready to begin.`
-        : 'The players have just gathered for the first time, seeking adventure.';
+        ? `The Game Master has set the scene: "${campaignPrompt}". The players' characters are present. The party consists of: "${characterPrompt || 'A group of new adventurers'}". The players are ready to begin.`
+        : `The players have just gathered for the first time, seeking adventure. The party consists of: "${characterPrompt || 'A group of new adventurers'}".`;
 
       const storyInput: DynamicStoryTellingInput = {
         gameSetting: activeSystemSettings.gameSetting,
@@ -158,9 +159,16 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
   return (
     <div className="flex flex-col h-screen bg-background font-body">
       <Header gameId={gameId} />
-      <main className="flex-1 flex flex-col gap-4 p-4">
-        <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} />
-        <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} />
+      <main className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-4 p-4">
+        {/* Center Panel */}
+        <div className="flex flex-col col-span-1 lg:col-span-8 h-full overflow-hidden gap-4">
+          <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} />
+          <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} />
+        </div>
+        {/* Right Panel */}
+        <div className="hidden lg:flex lg:flex-col lg:col-span-4 gap-4 overflow-y-auto">
+            <ActionTracker characterPrompt={characterPrompt} />
+        </div>
       </main>
     </div>
   );

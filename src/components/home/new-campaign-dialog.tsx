@@ -158,7 +158,7 @@ export function NewCampaignDialog() {
               </div>
                <div className="space-y-2">
                  <div className="flex items-center justify-between">
-                    <Label htmlFor="character-prompt">Your Character</Label>
+                    <Label htmlFor="character-prompt">{localPlay ? 'Player Characters' : 'Your Character'}</Label>
                      <Button variant="ghost" size="sm" onClick={handleRandomizeCharacter}>
                       <Dices className="mr-2 h-4 w-4" />
                       Randomize
@@ -168,7 +168,11 @@ export function NewCampaignDialog() {
                   id="character-prompt"
                   value={characterPrompt}
                   onChange={(e) => setCharacterPrompt(e.target.value)}
-                  placeholder={systemPlaceholders[selectedSystem]?.character || "Describe your character..."}
+                  placeholder={
+                    localPlay 
+                    ? "List the characters in your party, e.g.,\n- Kael, the Human Fighter\n- Lyra, the Elven Rogue\n- Balthazar, the Dwarven Cleric" 
+                    : (systemPlaceholders[selectedSystem]?.character || "Describe your character...")
+                  }
                 />
               </div>
               <div className="flex items-center space-x-2">
