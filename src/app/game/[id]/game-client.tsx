@@ -122,17 +122,26 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
             });
           });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Story generation failed:", error);
+      const errorMessage = error.message || '';
+      let toastDescription = "Failed to get a response from the AI Game Master.";
+      let chatContent = "The connection to the ethereal plane was lost. Please try again.";
+
+      if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
+        toastDescription = "The AI Game Master is currently overloaded with requests. Please try again in a moment.";
+        chatContent = "The AI seems to be pondering a great many things at once and needs a moment to catch its breath. Please ask again shortly.";
+      }
+      
       toast({
         title: "An Error Occurred",
-        description: "Failed to get a response from the AI Game Master.",
+        description: toastDescription,
         variant: "destructive"
       });
        const newErrorMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: "The connection to the ethereal plane was lost. Please try again.",
+        content: chatContent,
       };
       setMessages((prev) => [...prev, newErrorMessage]);
     } finally {
