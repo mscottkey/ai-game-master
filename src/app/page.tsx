@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,11 +13,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
+import { NewCampaignDialog } from "@/components/home/new-campaign-dialog";
 
 export default function Home() {
-  const newGameId = `session-${Math.random().toString(36).substr(2, 9)}`;
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4">
       <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
@@ -28,12 +28,7 @@ export default function Home() {
           Your personal AI-powered Game Master for limitless tabletop RPG adventures. Create dynamic campaigns, generate unique worlds, and play with friends in real-time.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
-          <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            <Link href={`/game/${newGameId}`}>
-              <Swords className="mr-2" />
-              Create New Campaign
-            </Link>
-          </Button>
+          <NewCampaignDialog />
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" size="lg">
