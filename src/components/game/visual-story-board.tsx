@@ -31,9 +31,9 @@ export function VisualStoryBoard({ story, imageUrl, isLoading }: VisualStoryBoar
       </div>
       <CardContent className="p-4 flex-1">
         <ScrollArea className="h-full">
-          <p className="text-sm text-foreground/90 leading-relaxed">
+          <div className="text-sm text-foreground/90 leading-relaxed">
             {isLoading ? <Skeleton className="h-4 w-3/4" /> : story}
-          </p>
+          </div>
         </ScrollArea>
       </CardContent>
     </Card>
