@@ -8,7 +8,7 @@ import { CharacterCreationClient } from './character-creation-client';
 type GameState = 'initializing' | 'character-creation' | 'in-progress';
 
 export default function GamePage({
-  params,
+  params: { id },
   searchParams,
 }: {
   params: { id: string };
@@ -27,7 +27,7 @@ export default function GamePage({
   };
 
   const gameProps = {
-    gameId: params.id,
+    gameId: id,
     system: searchParams.system || 'dnd5e',
     campaignPrompt: searchParams.campaign,
     characterPrompt: searchParams.character,
