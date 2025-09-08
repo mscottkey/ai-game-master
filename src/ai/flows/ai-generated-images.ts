@@ -34,6 +34,14 @@ const generateImageFlow = ai.defineFlow(
     outputSchema: GenerateImageOutputSchema,
   },
   async input => {
+    // NOTE: Using placeholder images to avoid Imagen API billing requirements.
+    // To re-enable AI image generation, replace this with the commented-out code below.
+    const width = 800;
+    const height = 600;
+    const imageUrl = `https://picsum.photos/${width}/${height}`;
+    return { imageUrl };
+
+    /*
     const {media} = await ai.generate({
       model: 'googleai/imagen-4.0-fast-generate-001',
       prompt: input.prompt,
@@ -44,5 +52,6 @@ const generateImageFlow = ai.defineFlow(
     }
 
     return {imageUrl: media.url};
+    */
   }
 );
