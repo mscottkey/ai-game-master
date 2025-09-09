@@ -6,12 +6,13 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCJ8VqQ3KDG9Apk5NfMOTP3KHpbBeB7ifc",
-  authDomain: "ai-dungeon-master-3opix.firebaseapp.com",
-  projectId: "ai-dungeon-master-3opix",
-  storageBucket: "ai-dungeon-master-3opix.firebasestorage.app",
-  messagingSenderId: "974007310177",
-  appId: "1:974007310177:web:9ba4b687bd6d349a761720"
+  apiKey: "AIzaSyCZk7rpc6YjpR9qhZ_8SRO7jLBu5-xJN4A",
+  authDomain: "roleplai-7540e.firebaseapp.com",
+  projectId: "roleplai-7540e",
+  storageBucket: "roleplai-7540e.firebasestorage.app",
+  messagingSenderId: "767539080123",
+  appId: "1:767539080123:web:52a45ab2a009ee9543329e",
+  measurementId: "G-YSMH24EJYK"
 };
 
 
