@@ -83,7 +83,7 @@ const mockFateCharacter: FateCharacter = {
   aspects: [
     { type: 'High Concept', name: 'Hardboiled Detective with a Conscience' },
     { type: 'Trouble', name: 'Owes a Debt to the Blackwood Gang' },
-    { type: 'Other', name: 'Never Forgets a Face' },
+    { type: 'Other', name: 'Never forgets a Face' },
   ],
   skills: [
     { name: 'Investigate', rank: 4 },
@@ -119,10 +119,11 @@ const generateCharacterFlow = ai.defineFlow(
     // This avoids using the AI for the initial setup, saving API calls during UI development.
     if (input.useMocks) {
       console.log('Returning mock character data because useMocks is true.');
+      const suffix = Math.floor(Math.random() * 1000);
       switch (input.gameSystem) {
-        case 'dnd5e': return mockDndCharacter;
-        case 'fate': return mockFateCharacter;
-        case 'starwars-ffg': return mockStarWarsCharacter;
+        case 'dnd5e': return { ...mockDndCharacter, name: `${mockDndCharacter.name} ${suffix}` };
+        case 'fate': return { ...mockFateCharacter, name: `${mockFateCharacter.name} ${suffix}` };
+        case 'starwars-ffg': return { ...mockStarWarsCharacter, name: `${mockStarWarsCharacter.name} ${suffix}` };
         default: break;
       }
     }
