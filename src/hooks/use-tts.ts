@@ -6,12 +6,12 @@ import { useState, useEffect, useCallback } from 'react';
 export const useTTS = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       setIsSupported(true);
 
-      // This ensures that isSpeaking is reset if the user navigates away or closes the tab.
       const handleBeforeUnload = () => {
         window.speechSynthesis.cancel();
       };
@@ -32,15 +32,34 @@ export const useTTS = () => {
       return;
     }
 
+    // Clear any previous utterances that might be lingering
+    window.speechSynthesis.cancel();
+
     const utterance = new SpeechSynthesisUtterance(text);
+    utteranceRef.current = utterance;
+
     utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = (e) => {
-      console.error("SpeechSynthesis Error", e);
-      setIsSpeaking(false);
+    utterance.onend = () => {
+      // Check if this is still the current utterance before setting state
+      if (utteranceRef.current === utterance) {
+        setIsSpeaking(false);
+      }
+    };
+    utterance.onerror = (event) => {
+      // This is a known issue in some browsers when speech is cancelled.
+      // We can safely ignore the 'canceled' error.
+      if ((event as SpeechSynthesisErrorEvent).error === 'canceled') {
+        if (utteranceRef.current === utterance) {
+           setIsSpeaking(false);
+        }
+        return;
+      }
+      console.error("SpeechSynthesis Error", event);
+      if (utteranceRef.current === utterance) {
+        setIsSpeaking(false);
+      }
     };
 
-    window.speechSynthesis.cancel(); // Clear any previous utterances
     window.speechSynthesis.speak(utterance);
   }, [isSupported, isSpeaking]);
 
