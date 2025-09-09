@@ -19,6 +19,7 @@ import { BookOpen, LogIn, LogOut, Mail } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { ExistingCampaignsList } from "./existing-campaigns-list";
 
 function EmailSignInDialog({ onSignIn }: { onSignIn: (email: string) => void }) {
   const [email, setEmail] = useState('');
@@ -143,6 +144,9 @@ export function AuthGate() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <ExistingCampaignsList user={user} />
+
     </div>
   );
 }

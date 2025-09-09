@@ -15,11 +15,15 @@ import {
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Swords, ArrowRight, ArrowLeft, Dices } from "lucide-react";
 import { generatePrompt, systemPlaceholders } from "@/lib/prompt-generator";
 import { Switch } from "../ui/switch";
 import { RulebookUploader } from "./rulebook-uploader";
+import { useAuth } from "./auth-provider";
+import { saveCampaign } from "@/lib/campaign-manager";
+import { useToast } from "@/hooks/use-toast";
 
 const gameSystems = [
   {
@@ -42,8 +46,11 @@ const gameSystems = [
 type Step = "system" | "setup";
 
 export function NewCampaignDialog() {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [step, setStep] = useState<Step>("system");
   const [selectedSystem, setSelectedSystem] = useState<string>("dnd5e");
+  const [campaignName, setCampaignName] = useState("");
   const [campaignPrompt, setCampaignPrompt] = useState("");
   const [characterPrompt, setCharacterPrompt] = useState("");
   const [localPlay, setLocalPlay] = useState(false);
@@ -63,12 +70,16 @@ export function NewCampaignDialog() {
     if (step === "setup") {
       setCampaignPrompt("");
       setCharacterPrompt("");
+      setCampaignName("");
       setStep("system");
     }
   }
 
   const handleRandomizeCampaign = () => {
-    setCampaignPrompt(generatePrompt(selectedSystem, 'campaign'));
+    const newCampaignPrompt = generatePrompt(selectedSystem, 'campaign');
+    setCampaignPrompt(newCampaignPrompt);
+    // Auto-generate a campaign name based on the prompt
+    setCampaignName(newCampaignPrompt.split('.').slice(0, 2).join('.') + '.');
   }
 
   const handleRandomizeCharacter = () => {
@@ -83,6 +94,45 @@ export function NewCampaignDialog() {
       setCharacterPrompt(generatePrompt(selectedSystem, 'character'));
     }
   };
+
+  const handleStartCampaign = async () => {
+    if (!user) {
+      toast({
+        title: "Not Signed In",
+        description: "You must be signed in to create a campaign.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const finalCampaignName = campaignName.trim() || generatePrompt(selectedSystem, 'campaign').split('.').slice(0, 2).join('.') + '.';
+
+    const campaignData = {
+      userId: user.uid,
+      name: finalCampaignName,
+      gameId: gameIdRef.current,
+      system: selectedSystem,
+      campaignPrompt: campaignPrompt,
+      characterPrompt: characterPrompt,
+      isLocal: localPlay,
+    };
+    
+    try {
+      await saveCampaign(campaignData);
+      // The Link component will handle navigation. We just close the dialog.
+      setOpen(false);
+      // Reset state for next time
+      handleBack();
+      setStep("system");
+    } catch (error) {
+       toast({
+        title: "Error",
+        description: "Could not save the new campaign. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
 
   const getStartLink = () => {
     const params = new URLSearchParams();
@@ -158,6 +208,15 @@ export function NewCampaignDialog() {
             </DialogHeader>
             <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
               <RulebookUploader sessionId={gameIdRef.current} />
+               <div className="space-y-2">
+                 <Label htmlFor="campaign-name">Campaign Name</Label>
+                 <Input 
+                  id="campaign-name"
+                  value={campaignName}
+                  onChange={(e) => setCampaignName(e.target.value)}
+                  placeholder="e.g., The Whispering Caves"
+                 />
+              </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="campaign-prompt">Campaign Prompt</Label>
@@ -211,8 +270,8 @@ export function NewCampaignDialog() {
               <Button variant="outline" onClick={handleBack}>
                  <ArrowLeft className="mr-2" /> Back
               </Button>
-              <Button asChild onClick={() => setOpen(false)}>
-                <Link href={getStartLink()}>
+              <Button asChild>
+                <Link href={getStartLink()} onClick={handleStartCampaign}>
                   Start Campaign
                 </Link>
               </Button>
