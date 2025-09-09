@@ -3,6 +3,7 @@
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from "firebase/auth";
+import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -14,9 +15,14 @@ const firebaseConfig = {
   appId: "1:974007310177:web:9ba4b687bd6d349a761720"
 };
 
-// Initialize Firebase only if it hasn't been initialized yet
+// Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// Initialize Analytics only in the browser
+if (typeof window !== 'undefined') {
+  getAnalytics(app);
+}
 
 export { app, db, auth };
