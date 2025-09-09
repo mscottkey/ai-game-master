@@ -78,6 +78,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    // This effect should only run once on mount to set up the auth listener.
+    // The empty dependency array [] ensures this.
+
     // Handle email link sign-in on page load
     if (isSignInWithEmailLink(auth, window.location.href)) {
       let email = window.localStorage.getItem('emailForSignIn');
@@ -99,14 +102,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
 
-
+    // Set up the listener for auth state changes
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
       setLoading(false);
     });
 
+    // Cleanup function to unsubscribe when the component unmounts
     return () => unsubscribe();
-  }, []);
+  }, []); // <-- This empty dependency array is the crucial fix.
 
   const value = { user, loading, signInWithGoogle, signInWithEmail, logOut };
 
