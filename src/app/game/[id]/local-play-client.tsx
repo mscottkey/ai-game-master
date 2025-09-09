@@ -279,5 +279,3 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
     </div>
   );
 }
-
-    
