@@ -49,7 +49,7 @@ export function ExistingCampaignsList({ user }: ExistingCampaignsListProps) {
     if (user?.uid) {
       fetchCampaigns();
     }
-  }, [user?.uid]);
+  }, [user?.uid, user]);
 
   if (loading) {
     return (
