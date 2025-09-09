@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { User } from 'firebase/auth';
 import { GoogleAuthProvider, signInWithPopup, signOut, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     handleCodeInApp: true,
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
@@ -51,9 +51,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         toast({ title: "Sign in failed", description: error.message || "Could not sign in with Google.", variant: "destructive" });
       }
     }
-  };
+  }, [toast]);
 
-  const signInWithEmail = async (email: string) => {
+  const signInWithEmail = useCallback(async (email: string) => {
     try {
       await sendSignInLinkToEmail(auth, email, actionCodeSettings);
       window.localStorage.setItem('emailForSignIn', email);
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('Error sending email link', error);
       toast({ title: "Sign in failed", description: error.message || "Could not send sign-in email.", variant: "destructive" });
     }
-  };
+  }, [toast, actionCodeSettings]);
 
   const logOut = async () => {
     try {
@@ -78,15 +78,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // This effect should only run once on mount to set up the auth listener.
-    // The empty dependency array [] ensures this.
-
-    // Handle email link sign-in on page load
     if (isSignInWithEmailLink(auth, window.location.href)) {
       let email = window.localStorage.getItem('emailForSignIn');
       if (!email) {
-        // User opened the link on a different device. To prevent session fixation
-        // attacks, ask the user to provide the email again.
         email = window.prompt('Please provide your email for confirmation');
       }
       if (email) {
@@ -102,15 +96,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
 
-    // Set up the listener for auth state changes
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
       setLoading(false);
     });
 
-    // Cleanup function to unsubscribe when the component unmounts
     return () => unsubscribe();
-  }, []); // <-- This empty dependency array is the crucial fix.
+  }, [toast]);
 
   const value = { user, loading, signInWithGoogle, signInWithEmail, logOut };
 
