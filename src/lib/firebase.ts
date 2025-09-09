@@ -9,7 +9,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCJ8VqQ3KDG9Apk5NfMOTP3KHpbBeB7ifc",
   authDomain: "ai-dungeon-master-3opix.firebaseapp.com",
   projectId: "ai-dungeon-master-3opix",
-  storageBucket: "ai-dungeon-master-3opix.appspot.com",
+  storageBucket: "ai-dungeon-master-3opix.firebasestorage.app",
   messagingSenderId: "974007310177",
   appId: "1:974007310177:web:9ba4b687bd6d349a761720"
 };
