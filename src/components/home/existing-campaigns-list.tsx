@@ -46,8 +46,10 @@ export function ExistingCampaignsList({ user }: ExistingCampaignsListProps) {
       setLoading(false);
     };
 
-    fetchCampaigns();
-  }, [user]);
+    if (user?.uid) {
+      fetchCampaigns();
+    }
+  }, [user?.uid]);
 
   if (loading) {
     return (
