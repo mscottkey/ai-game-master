@@ -4,9 +4,9 @@
 import type { Message } from 'ai/react';
 import { useState, useEffect, useCallback } from 'react';
 import {
-  dynamicStoryTelling,
-  DynamicStoryTellingInput,
-} from '@/ai/flows/dynamic-story-telling';
+  rulesAwareStoryTelling,
+  RulesAwareStoryTellingInput,
+} from '@/ai/flows/rules-aware-gm';
 import { generateImage } from '@/ai/flows/ai-generated-images';
 import { useToast } from '@/hooks/use-toast';
 import type { GameClientProps } from './game-client';
@@ -14,6 +14,7 @@ import { Header } from '@/components/game/header';
 import { VisualStoryBoard } from '@/components/game/visual-story-board';
 import { ChatPanel } from '@/components/game/chat-panel';
 import { ActionTracker } from '@/components/game/action-tracker';
+import { RulesPanel } from '@/components/game/rules-panel';
 
 type GameSystem = 'dnd5e' | 'fate' | 'starwars-ffg';
 type MessageMode = 'in-character' | 'out-of-character';
@@ -72,14 +73,15 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
     }
 
     try {
-      const storyInput: DynamicStoryTellingInput = {
+      const storyInput: RulesAwareStoryTellingInput = {
         gameSetting: activeSystemSettings.gameSetting,
         playerActions: playerMessageContent, // Send combined content to AI
         campaignHistory: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
         messageType: mode,
+        sessionId: gameId,
       };
       
-      const storyResult = await dynamicStoryTelling(storyInput);
+      const storyResult = await rulesAwareStoryTelling(storyInput);
       
       const newAssistantMessage: Message = {
         id: crypto.randomUUID(),
@@ -137,14 +139,15 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
         ? `The Game Master has set the scene: "${campaignPrompt}". The players' characters are present. The party consists of: "${characterPrompt || 'A group of new adventurers'}". The players are ready to begin.`
         : `The players have just gathered for the first time, seeking adventure. The party consists of: "${characterPrompt || 'A group of new adventurers'}".`;
 
-      const storyInput: DynamicStoryTellingInput = {
+      const storyInput: RulesAwareStoryTellingInput = {
         gameSetting: activeSystemSettings.gameSetting,
         playerActions: initialPlayerActions,
         campaignHistory: 'This is the very beginning of the campaign.',
         messageType: 'in-character',
+        sessionId: gameId,
       };
       
-      const storyResult = await dynamicStoryTelling(storyInput);
+      const storyResult = await rulesAwareStoryTelling(storyInput);
 
       const initialMessage: Message = {
         id: crypto.randomUUID(),
@@ -170,7 +173,7 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
     } finally {
       setIsInitialLoading(false);
     }
-  }, [system, campaignPrompt, characterPrompt, toast, activeSystemSettings]);
+  }, [gameId, system, campaignPrompt, characterPrompt, toast, activeSystemSettings]);
 
   useEffect(() => {
     generateInitialState();
@@ -197,12 +200,13 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
           <div className="lg:col-span-8 h-full">
             <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} characters={characters} isLocalPlay={true} />
           </div>
-          <div className="hidden lg:flex lg:col-span-4 h-full">
+          <div className="hidden lg:flex lg:col-span-4 h-full flex-col gap-4">
             <ActionTracker 
               characters={characters}
               onAddCharacter={handleAddCharacter}
               onRemoveCharacter={handleRemoveCharacter}
             />
+            <RulesPanel sessionId={gameId} />
           </div>
         </div>
       </main>

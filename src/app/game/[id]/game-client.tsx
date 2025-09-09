@@ -5,9 +5,9 @@ import type { Npc } from '@/lib/types';
 import type { Message } from 'ai/react';
 import { useState, useEffect, useCallback } from 'react';
 import {
-  dynamicStoryTelling,
-  DynamicStoryTellingInput,
-} from '@/ai/flows/dynamic-story-telling';
+  rulesAwareStoryTelling,
+  RulesAwareStoryTellingInput,
+} from '@/ai/flows/rules-aware-gm';
 import { generateImage } from '@/ai/flows/ai-generated-images';
 import { generateNpcs } from '@/ai/flows/generate-npcs';
 import { generateCharacter } from '@/ai/flows/generate-character';
@@ -27,9 +27,9 @@ import { CharacterSheetDnd5e } from '@/components/game/character-sheet-dnd5e';
 import { CharacterSheetFate } from '@/components/game/character-sheet-fate';
 import { CharacterSheetStarWars } from '@/components/game/character-sheet-starwars';
 import { NpcPanel } from '@/components/game/npc-panel';
-import { ActionTracker } from '@/components/game/action-tracker';
 import { useToast } from '@/hooks/use-toast';
 import { useTTS } from '@/hooks/use-tts';
+import { RulesPanel } from '@/components/game/rules-panel';
 
 type GameSystem = 'dnd5e' | 'fate' | 'starwars-ffg';
 type Character = Dnd5eCharacter | FateCharacter | StarWarsCharacter | null;
@@ -91,14 +91,15 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
     }
 
     try {
-      const storyInput: DynamicStoryTellingInput = {
+      const storyInput: RulesAwareStoryTellingInput = {
         gameSetting: activeSystemSettings.gameSetting,
         playerActions: content,
         campaignHistory: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
         messageType: mode,
+        sessionId: gameId,
       };
       
-      const storyResult = await dynamicStoryTelling(storyInput);
+      const storyResult = await rulesAwareStoryTelling(storyInput);
       
       const newAssistantMessage: Message = {
         id: crypto.randomUUID(),
@@ -186,13 +187,14 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
           ? `The Game Master has set the scene: "${campaignPrompt}". The players' characters are present. One of them is described as: "${characterPrompt || 'A new adventurer'}". The players are ready to begin.`
           : 'The players have just gathered for the first time, seeking adventure.';
 
-        const storyInput: DynamicStoryTellingInput = {
+        const storyInput: RulesAwareStoryTellingInput = {
           gameSetting: activeSystemSettings.gameSetting,
           playerActions: initialPlayerActions,
           campaignHistory: 'This is the very beginning of the campaign.',
           messageType: 'in-character', // Initial story is always in-character
+          sessionId: gameId,
         };
-        return dynamicStoryTelling(storyInput);
+        return rulesAwareStoryTelling(storyInput);
       })();
 
       const [characterResult, storyResult] = await Promise.all([characterPromise, storyPromise]);
@@ -225,7 +227,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
     } finally {
       setisInitialLoading(false);
     }
-  }, [system, campaignPrompt, characterPrompt, toast, activeSystemSettings]);
+  }, [system, gameId, campaignPrompt, characterPrompt, toast, activeSystemSettings]);
 
   useEffect(() => {
     generateInitialState();
@@ -276,7 +278,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
         {/* Right Panel */}
         <div className="hidden lg:flex lg:flex-col lg:col-span-3 gap-4 overflow-y-auto">
           {renderDiceRoller()}
-          <ActionTracker />
+          <RulesPanel sessionId={gameId} />
         </div>
       </main>
     </div>

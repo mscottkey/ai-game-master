@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Swords, ArrowRight, ArrowLeft, Dices } from "lucide-react";
 import { generatePrompt, systemPlaceholders } from "@/lib/prompt-generator";
 import { Switch } from "../ui/switch";
+import { RulebookUploader } from "./rulebook-uploader";
 
 const gameSystems = [
   {
@@ -46,8 +47,10 @@ export function NewCampaignDialog() {
   const [campaignPrompt, setCampaignPrompt] = useState("");
   const [characterPrompt, setCharacterPrompt] = useState("");
   const [localPlay, setLocalPlay] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  const newGameId = `session-${crypto.randomUUID().split('-')[0]}`;
+  // Use a ref to ensure the game ID is stable across re-renders of the dialog
+  const gameIdRef = useRef(`session-${crypto.randomUUID().split('-')[0]}`);
 
   const handleNext = () => {
     if (step === "system") {
@@ -83,12 +86,12 @@ export function NewCampaignDialog() {
     if (localPlay) {
       params.set("local", "true");
     }
-    return `/game/${newGameId}?${params.toString()}`;
+    return `/game/${gameIdRef.current}?${params.toString()}`;
   }
 
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="lg">
           <Swords className="mr-2" />
@@ -137,10 +140,11 @@ export function NewCampaignDialog() {
             <DialogHeader>
               <DialogTitle>Step 2: Setup Your Campaign</DialogTitle>
               <DialogDescription>
-                Describe the starting scenario for your adventure and your character.
+                Describe the starting scenario, your characters, and upload your rulebooks.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
+              <RulebookUploader sessionId={gameIdRef.current} />
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="campaign-prompt">Campaign Prompt</Label>
@@ -180,11 +184,11 @@ export function NewCampaignDialog() {
                 <Label htmlFor="local-play-mode">Local Play Mode</Label>
               </div>
             </div>
-            <DialogFooter className="flex justify-between w-full">
+            <DialogFooter className="flex justify-between w-full pt-4">
               <Button variant="outline" onClick={handleBack}>
                  <ArrowLeft className="mr-2" /> Back
               </Button>
-              <Button asChild>
+              <Button asChild onClick={() => setOpen(false)}>
                 <Link href={getStartLink()}>
                   Start Campaign
                 </Link>
