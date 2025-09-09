@@ -144,50 +144,57 @@ export function ChatPanel({ messages, onSendMessage, isLoading, characters = [],
             </Tooltip>
           </TooltipProvider>
         </div>
-        <form onSubmit={handleSubmit} className="flex gap-2 items-start">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
           {showCharacterSelector && (
-            <Select value={selectedCharacter} onValueChange={setSelectedCharacter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Character" />
-              </SelectTrigger>
-              <SelectContent>
-                {characters.map(char => (
-                  <SelectItem key={char} value={char}>{char}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          <div className="relative w-full">
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={mode === 'in-character' ? 'What do you do?' : 'Ask the GM anything...'}
-              disabled={isLoading || (showCharacterSelector && !selectedCharacter)}
-              autoComplete="off"
-              className="pr-10"
-              rows={1}
-            />
-             {isSupported && (
-               <Button
-                type="button"
+              <Select value={selectedCharacter} onValueChange={setSelectedCharacter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Character" />
+                </SelectTrigger>
+                <SelectContent>
+                  {characters.map(char => (
+                    <SelectItem key={char} value={char}>{char}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          <div className="flex gap-2 items-start">
+            <div className="relative w-full">
+              <Textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={mode === 'in-character' ? 'What do you do?' : 'Ask the GM anything...'}
+                disabled={isLoading || (showCharacterSelector && !selectedCharacter)}
+                autoComplete="off"
+                className="pr-20"
+                rows={1}
+              />
+              {isSupported && (
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className={cn("absolute right-10 top-1/2 -translate-y-1/2 h-8 w-8", isListening && "text-destructive")}
+                  onClick={isListening ? stopListening : startListening}
+                >
+                  {isListening ? <MicOff /> : <Mic />}
+                </Button>
+              )}
+               <Button 
+                type="submit" 
+                disabled={isLoading || !input.trim() || (showCharacterSelector && !selectedCharacter)} 
                 size="icon"
-                variant="ghost"
-                className={cn("absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8", isListening && "text-destructive")}
-                onClick={isListening ? stopListening : startListening}
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
               >
-                {isListening ? <MicOff /> : <Mic />}
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                <span className="sr-only">Send</span>
               </Button>
-            )}
+            </div>
           </div>
-          <Button type="submit" disabled={isLoading || !input.trim() || (showCharacterSelector && !selectedCharacter)} size="icon">
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
-            <span className="sr-only">Send</span>
-          </Button>
         </form>
       </div>
     </Card>
