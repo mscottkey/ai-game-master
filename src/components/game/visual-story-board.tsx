@@ -13,7 +13,7 @@ type VisualStoryBoardProps = {
 export function VisualStoryBoard({ story, imageUrl, isLoading }: VisualStoryBoardProps) {
   return (
     <Card className="flex-shrink-0 flex flex-col h-full">
-      <div className="relative w-full h-3/5">
+      <div className="relative w-full h-1/2">
         {isLoading ? (
           <div className="w-full h-full bg-secondary rounded-t-lg flex items-center justify-center">
              <LoadingState message="Setting the scene..." />
