@@ -1,20 +1,5 @@
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { BookOpen, Swords } from "lucide-react";
-import Link from "next/link";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { NewCampaignDialog } from "@/components/home/new-campaign-dialog";
+import { AuthGate } from "@/components/home/auth-gate";
 
 export default function Home() {
   return (
@@ -27,36 +12,7 @@ export default function Home() {
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-8">
           Your personal AI-powered Game Master for limitless tabletop RPG adventures. Create dynamic campaigns, generate unique worlds, and play with friends in real-time.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <NewCampaignDialog />
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="lg">
-                <BookOpen className="mr-2" />
-                Join Campaign
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Join Existing Campaign</DialogTitle>
-                <DialogDescription>
-                  Enter the session code provided by your Game Master to join the adventure.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="session-code" className="text-right">
-                    Session Code
-                  </Label>
-                  <Input id="session-code" placeholder="Enter code..." className="col-span-3" />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit">Join Session</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <AuthGate />
       </main>
       <footer className="z-10 mt-16 text-sm text-muted-foreground">
         <p>Powered by Genkit and Firebase.</p>
