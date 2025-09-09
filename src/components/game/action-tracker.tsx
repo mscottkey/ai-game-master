@@ -1,20 +1,28 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ListTodo, User, Plus, X, Pencil } from "lucide-react";
+import { ListTodo, User, Plus, X, Pencil, FileText } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
 import { cn } from "@/lib/utils";
+import type { 
+  Dnd5eCharacter,
+  FateCharacter,
+  StarWarsCharacter,
+} from "@/ai/flows/generate-character.types";
+
+type Character = Dnd5eCharacter | FateCharacter | StarWarsCharacter;
 
 interface ActionTrackerProps {
-  characters: string[];
-  onAddCharacter: (name: string) => void;
+  characters: Character[];
+  onAddCharacter: (prompt: string) => void;
   onRemoveCharacter: (name: string) => void;
   onEditCharacter: (oldName: string, newName: string) => void;
+  onViewCharacter: (character: Character) => void;
 }
 
-export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter, onEditCharacter }: ActionTrackerProps) {
+export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter, onEditCharacter, onViewCharacter }: ActionTrackerProps) {
   const [newCharacterName, setNewCharacterName] = useState("");
   const [editingName, setEditingName] = useState<string | null>(null);
   const [editedValue, setEditedValue] = useState("");
@@ -75,7 +83,7 @@ export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter, o
       <CardContent className="flex-1 flex flex-col gap-4 min-h-0">
         <div className="flex gap-2">
           <Input
-            placeholder="New character name..."
+            placeholder="Describe a new character..."
             value={newCharacterName}
             onChange={(e) => setNewCharacterName(e.target.value)}
             onKeyPress={handleAddKeyPress}
@@ -89,10 +97,10 @@ export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter, o
           <div className="space-y-2 pr-2">
             {characters.length > 0 ? (
               characters.map(character => (
-                <div key={character} className="group flex items-center justify-between p-2 bg-secondary rounded-md text-sm">
+                <div key={character.name} className="group flex items-center justify-between p-2 bg-secondary rounded-md text-sm">
                   <div className="flex items-center gap-2 w-full">
                     <User className="w-4 h-4 shrink-0" />
-                    {editingName === character ? (
+                    {editingName === character.name ? (
                        <Input 
                           ref={editInputRef}
                           value={editedValue}
@@ -104,20 +112,24 @@ export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter, o
                     ) : (
                       <span 
                         className="truncate cursor-pointer hover:text-accent"
-                        onClick={() => handleEditClick(character)}
+                        onClick={() => handleEditClick(character.name)}
                       >
-                        {character}
+                        {character.name}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center">
-                    <Button variant="ghost" size="icon" className={cn("h-6 w-6 shrink-0", editingName === character ? "hidden": "")} onClick={() => handleEditClick(character)}>
-                        <Pencil className="w-3 h-3" />
-                        <span className="sr-only">Edit {character}</span>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => onViewCharacter(character)}>
+                      <FileText className="w-3 h-3" />
+                      <span className="sr-only">View {character.name}'s sheet</span>
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => onRemoveCharacter(character)}>
+                    <Button variant="ghost" size="icon" className={cn("h-6 w-6 shrink-0", editingName === character.name ? "hidden": "")} onClick={() => handleEditClick(character.name)}>
+                        <Pencil className="w-3 h-3" />
+                        <span className="sr-only">Edit {character.name}</span>
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => onRemoveCharacter(character.name)}>
                       <X className="w-4 h-4" />
-                      <span className="sr-only">Remove {character}</span>
+                      <span className="sr-only">Remove {character.name}</span>
                     </Button>
                   </div>
                 </div>
@@ -134,3 +146,5 @@ export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter, o
     </Card>
   );
 }
+
+    

@@ -15,8 +15,24 @@ import { VisualStoryBoard } from '@/components/game/visual-story-board';
 import { ChatPanel } from '@/components/game/chat-panel';
 import { ActionTracker } from '@/components/game/action-tracker';
 import { RulesPanel } from '@/components/game/rules-panel';
+import { generateCharacter } from '@/ai/flows/generate-character';
+import type { 
+  Dnd5eCharacter,
+  FateCharacter,
+  StarWarsCharacter,
+} from '@/ai/flows/generate-character.types';
+import { CharacterSheetDnd5e } from '@/components/game/character-sheet-dnd5e';
+import { CharacterSheetFate } from '@/components/game/character-sheet-fate';
+import { CharacterSheetStarWars } from '@/components/game/character-sheet-starwars';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type GameSystem = 'dnd5e' | 'fate' | 'starwars-ffg';
+type Character = Dnd5eCharacter | FateCharacter | StarWarsCharacter;
 type MessageMode = 'in-character' | 'out-of-character';
 
 const systemSettings: Record<GameSystem, { gameSetting: string; imagePromptPrefix: string }> = {
@@ -40,17 +56,10 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
   const [messages, setMessages] = useState<Message[]>([]);
   const [story, setStory] = useState('');
   const [imageUrl, setImageUrl] = useState<string>('');
-  const [characters, setCharacters] = useState<string[]>([]);
+  const [characters, setCharacters] = useState<Character[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-
-  useEffect(() => {
-    if (characterPrompt) {
-      // Split by newline and filter out empty lines
-      const initialCharacters = characterPrompt.split('\n').map(c => c.trim().replace(/^-/, '').trim()).filter(Boolean);
-      setCharacters(initialCharacters);
-    }
-  }, [characterPrompt]);
+  const [selectedCharacterSheet, setSelectedCharacterSheet] = useState<Character | null>(null);
 
   const activeSystemSettings = systemSettings[system] || systemSettings['dnd5e'];
 
@@ -136,6 +145,15 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
   const generateInitialState = useCallback(async () => {
     setIsInitialLoading(true);
     try {
+      // Generate character sheets in parallel
+      const characterPrompts = characterPrompt?.split('\n').map(c => c.trim().replace(/^-/, '').trim()).filter(Boolean) || [];
+      const characterPromises = characterPrompts.map(prompt => 
+        generateCharacter({ characterPrompt: prompt, gameSystem: system, useMocks })
+      );
+      
+      const characterResults = await Promise.all(characterPromises);
+      setCharacters(characterResults as Character[]);
+
       const initialPlayerActions = campaignPrompt 
         ? `The Game Master has set the scene: "${campaignPrompt}". The players' characters are present. The party consists of: "${characterPrompt || 'A group of new adventurers'}". The players are ready to begin.`
         : `The players have just gathered for the first time, seeking adventure. The party consists of: "${characterPrompt || 'A group of new adventurers'}".`;
@@ -181,42 +199,79 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
     generateInitialState();
   }, [generateInitialState]);
 
-  const handleAddCharacter = (name: string) => {
-    if (name && !characters.includes(name)) {
-      setCharacters(prev => [...prev, name]);
+  const handleAddCharacter = async (name: string) => {
+    if (name && !characters.some(c => c.name === name)) {
+      try {
+        const newCharacter = await generateCharacter({ characterPrompt: name, gameSystem: system, useMocks: false });
+        setCharacters(prev => [...prev, newCharacter as Character]);
+      } catch (e) {
+         toast({ title: "Error", description: "Could not generate new character.", variant: "destructive"});
+      }
     }
   };
 
   const handleRemoveCharacter = (name: string) => {
-    setCharacters(prev => prev.filter(c => c !== name));
+    setCharacters(prev => prev.filter(c => c.name !== name));
   };
   
   const handleEditCharacter = (oldName: string, newName: string) => {
-    setCharacters(prev => prev.map(c => c === oldName ? newName : c));
+    setCharacters(prev => prev.map(c => (c.name === oldName ? { ...c, name: newName } : c)));
   };
+
+  const handleViewCharacter = (character: Character) => {
+    setSelectedCharacterSheet(character);
+  };
+
+  const renderCharacterSheet = (character: Character) => {
+    switch (system) {
+      case 'dnd5e':
+        return <CharacterSheetDnd5e character={character as Dnd5eCharacter | null} isLoading={false} />;
+      case 'fate':
+        return <CharacterSheetFate character={character as FateCharacter | null} isLoading={false} />;
+      case 'starwars-ffg':
+        return <CharacterSheetStarWars character={character as StarWarsCharacter | null} isLoading={false} />;
+      default:
+        return null;
+    }
+  }
 
   return (
     <div className="flex flex-col h-screen bg-background font-body">
       <Header gameId={gameId} />
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden gap-4 p-4">
-        <div className="lg:col-span-8 h-full overflow-hidden">
+        <div className="lg:col-span-8 h-full overflow-hidden flex flex-col">
             <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} />
         </div>
         <div className="lg:col-span-4 h-full flex flex-col gap-4 overflow-hidden">
            <div className="flex-1 min-h-0">
-             <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} characters={characters} isLocalPlay={true} />
+             <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} characters={characters.map(c => c.name)} isLocalPlay={true} />
           </div>
-          <div className="flex-1 hidden lg:flex flex-col gap-4 min-h-0">
+          <div className="flex-1 flex flex-col gap-4 min-h-0">
              <ActionTracker 
               characters={characters}
               onAddCharacter={handleAddCharacter}
               onRemoveCharacter={handleRemoveCharacter}
               onEditCharacter={handleEditCharacter}
+              onViewCharacter={handleViewCharacter}
             />
             <RulesPanel sessionId={gameId} />
           </div>
         </div>
       </main>
+
+      <Dialog open={!!selectedCharacterSheet} onOpenChange={(isOpen) => !isOpen && setSelectedCharacterSheet(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Character Sheet</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[80vh] overflow-y-auto pr-4">
+            {selectedCharacterSheet && renderCharacterSheet(selectedCharacterSheet)}
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
+
+    
