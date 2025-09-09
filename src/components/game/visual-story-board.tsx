@@ -6,6 +6,7 @@ import { LoadingState } from "./loading-state";
 import ReactMarkdown from 'react-markdown';
 import { Button } from "../ui/button";
 import { Volume2 } from "lucide-react";
+import { useCallback } from "react";
 
 type VisualStoryBoardProps = {
   story: string;
@@ -16,6 +17,10 @@ type VisualStoryBoardProps = {
 };
 
 export function VisualStoryBoard({ story, imageUrl, isLoading, latestNarrative, onSpeak }: VisualStoryBoardProps) {
+  const handleSpeak = useCallback(() => {
+    onSpeak(latestNarrative);
+  }, [onSpeak, latestNarrative]);
+
   return (
     <Card className="flex-shrink-0 flex flex-col h-full">
       <div className="relative w-full h-full">
@@ -43,7 +48,7 @@ export function VisualStoryBoard({ story, imageUrl, isLoading, latestNarrative, 
             size="icon"
             variant="ghost"
             className="absolute top-4 right-4 z-10"
-            onClick={() => onSpeak(latestNarrative)}
+            onClick={handleSpeak}
             aria-label="Read latest narrative aloud"
           >
             <Volume2 />
