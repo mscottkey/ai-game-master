@@ -35,9 +35,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error: any) {
       console.error('Error signing in with Google', error);
       if (error.code === 'auth/popup-closed-by-user') {
-        toast({ title: "Sign in cancelled", description: "The sign-in window was closed before completion.", variant: "destructive" });
+        toast({ 
+          title: "Sign in cancelled", 
+          description: "This may be due to an incomplete OAuth Consent Screen configuration in your Google Cloud project.", 
+          variant: "destructive" 
+        });
       } else if (error.code === 'auth/unauthorized-domain') {
-         toast({ title: "Sign in failed", description: "This app's domain is not authorized for sign-in. Please contact support.", variant: "destructive" });
+         toast({ 
+           title: "Sign in failed: Unauthorized Domain", 
+           description: "This app's domain is not authorized for sign-in. Please add it in your Firebase project settings.", 
+           variant: "destructive" 
+          });
       }
       else {
         toast({ title: "Sign in failed", description: error.message || "Could not sign in with Google.", variant: "destructive" });
