@@ -5,8 +5,8 @@ import type { Message } from 'ai/react';
 import { useState, useEffect, useCallback } from 'react';
 import {
   rulesAwareStoryTelling,
-  RulesAwareStoryTellingInput,
 } from '@/ai/flows/rules-aware-gm';
+import type { RulesAwareStoryTellingInput } from '@/ai/flows/rules-aware-gm.types';
 import { generateImage } from '@/ai/flows/ai-generated-images';
 import { useToast } from '@/hooks/use-toast';
 import type { GameClientProps } from './game-client';

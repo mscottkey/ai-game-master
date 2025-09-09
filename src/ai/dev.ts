@@ -9,3 +9,4 @@ import '@/ai/flows/generate-npcs.ts';
 import '@/ai/flows/generate-character.ts';
 import '@/ai/flows/generate-character.types.ts';
 import '@/ai/flows/rules-aware-gm.ts';
+import '@/ai/flows/rules-aware-gm.types.ts';

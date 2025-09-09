@@ -6,8 +6,8 @@ import type { Message } from 'ai/react';
 import { useState, useEffect, useCallback } from 'react';
 import {
   rulesAwareStoryTelling,
-  RulesAwareStoryTellingInput,
 } from '@/ai/flows/rules-aware-gm';
+import type { RulesAwareStoryTellingInput } from '@/ai/flows/rules-aware-gm.types';
 import { generateImage } from '@/ai/flows/ai-generated-images';
 import { generateNpcs } from '@/ai/flows/generate-npcs';
 import { generateCharacter } from '@/ai/flows/generate-character';
