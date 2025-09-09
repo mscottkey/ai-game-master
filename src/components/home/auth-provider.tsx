@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from 'firebase/auth';
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -11,6 +11,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string) => Promise<void>;
   logOut: () => Promise<void>;
 }
 
@@ -21,6 +22,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  const actionCodeSettings = {
+    url: typeof window !== 'undefined' ? window.location.href : 'http://localhost:9002',
+    handleCodeInApp: true,
+  };
+
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -28,7 +34,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       toast({ title: "Signed in successfully!" });
     } catch (error: any) {
       console.error('Error signing in with Google', error);
-      toast({ title: "Sign in failed", description: error.message || "Could not sign in with Google.", variant: "destructive" });
+      if (error.code === 'auth/popup-closed-by-user') {
+        toast({ title: "Sign in cancelled", description: "The sign-in window was closed before completion.", variant: "destructive" });
+      } else if (error.code === 'auth/unauthorized-domain') {
+         toast({ title: "Sign in failed", description: "This app's domain is not authorized for sign-in. Please contact support.", variant: "destructive" });
+      }
+      else {
+        toast({ title: "Sign in failed", description: error.message || "Could not sign in with Google.", variant: "destructive" });
+      }
+    }
+  };
+
+  const signInWithEmail = async (email: string) => {
+    try {
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      window.localStorage.setItem('emailForSignIn', email);
+      toast({
+        title: 'Check your email',
+        description: `A sign-in link has been sent to ${email}.`,
+      });
+    } catch (error: any) {
+      console.error('Error sending email link', error);
+      toast({ title: "Sign in failed", description: error.message || "Could not send sign-in email.", variant: "destructive" });
     }
   };
 
@@ -43,6 +70,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    // Handle email link sign-in on page load
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      let email = window.localStorage.getItem('emailForSignIn');
+      if (!email) {
+        // User opened the link on a different device. To prevent session fixation
+        // attacks, ask the user to provide the email again.
+        email = window.prompt('Please provide your email for confirmation');
+      }
+      if (email) {
+        signInWithEmailLink(auth, email, window.location.href)
+          .then(() => {
+            window.localStorage.removeItem('emailForSignIn');
+            toast({ title: "Signed in successfully!" });
+          })
+          .catch((error) => {
+            console.error('Error signing in with email link', error);
+            toast({ title: "Sign in failed", description: "The sign-in link is invalid or has expired.", variant: "destructive" });
+          });
+      }
+    }
+
+
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
       setLoading(false);
@@ -51,7 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
-  const value = { user, loading, signInWithGoogle, logOut };
+  const value = { user, loading, signInWithGoogle, signInWithEmail, logOut };
 
   return (
     <AuthContext.Provider value={value}>

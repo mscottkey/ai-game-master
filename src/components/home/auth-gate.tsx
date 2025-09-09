@@ -15,12 +15,65 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BookOpen, LogIn, LogOut } from "lucide-react";
+import { BookOpen, LogIn, LogOut, Mail } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
+
+function EmailSignInDialog({ onSignIn }: { onSignIn: (email: string) => void }) {
+  const [email, setEmail] = useState('');
+  const [open, setOpen] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSignIn(email);
+    setOpen(false); // Close the dialog after submission
+  };
+
+  return (
+     <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="secondary">
+          <Mail className="mr-2" />
+          Sign In with Email
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle>Sign in with your email</DialogTitle>
+            <DialogDescription>
+              We'll send a secure, passwordless sign-in link to your email address.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="email" className="text-right">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                className="col-span-3"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit">Send Sign-In Link</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 export function AuthGate() {
-  const { user, signInWithGoogle, logOut, loading } = useAuth();
+  const { user, signInWithGoogle, signInWithEmail, logOut, loading } = useAuth();
 
   if (loading) {
     return <div className="h-11 w-48 animate-pulse rounded-md bg-muted" />;
@@ -28,10 +81,13 @@ export function AuthGate() {
 
   if (!user) {
     return (
-      <Button onClick={signInWithGoogle} size="lg">
-        <LogIn className="mr-2" />
-        Sign In with Google
-      </Button>
+      <div className="flex flex-col sm:flex-row items-center gap-4">
+        <Button onClick={signInWithGoogle} size="lg">
+          <LogIn className="mr-2" />
+          Sign In with Google
+        </Button>
+        <EmailSignInDialog onSignIn={signInWithEmail} />
+      </div>
     );
   }
 
@@ -43,9 +99,9 @@ export function AuthGate() {
             <DropdownMenuTrigger className="flex items-center gap-2 outline-none">
               <Avatar>
                 <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? 'User'} />
-                <AvatarFallback>{user.displayName?.charAt(0) ?? 'U'}</AvatarFallback>
+                <AvatarFallback>{user.email?.charAt(0).toUpperCase() ?? 'U'}</AvatarFallback>
               </Avatar>
-              <span className="font-semibold">{user.displayName}</span>
+              <span className="font-semibold">{user.displayName || user.email}</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
