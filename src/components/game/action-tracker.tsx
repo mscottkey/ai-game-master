@@ -1,19 +1,30 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ListTodo, User, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { ListTodo, User, Plus, X, Pencil } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 interface ActionTrackerProps {
   characters: string[];
   onAddCharacter: (name: string) => void;
   onRemoveCharacter: (name: string) => void;
+  onEditCharacter: (oldName: string, newName: string) => void;
 }
 
-export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter }: ActionTrackerProps) {
+export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter, onEditCharacter }: ActionTrackerProps) {
   const [newCharacterName, setNewCharacterName] = useState("");
+  const [editingName, setEditingName] = useState<string | null>(null);
+  const [editedValue, setEditedValue] = useState("");
+  const editInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingName !== null && editInputRef.current) {
+      editInputRef.current.focus();
+    }
+  }, [editingName]);
 
   const handleAddClick = () => {
     if (newCharacterName.trim()) {
@@ -22,9 +33,31 @@ export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter }:
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleAddKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleAddClick();
+    }
+  };
+  
+  const handleEditClick = (name: string) => {
+    setEditingName(name);
+    setEditedValue(name);
+  };
+
+  const handleEditSave = () => {
+    if (editingName && editedValue.trim() && editingName !== editedValue.trim()) {
+      onEditCharacter(editingName, editedValue.trim());
+    }
+    setEditingName(null);
+    setEditedValue("");
+  };
+
+  const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleEditSave();
+    } else if (e.key === 'Escape') {
+      setEditingName(null);
+      setEditedValue("");
     }
   };
 
@@ -45,7 +78,7 @@ export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter }:
             placeholder="New character name..."
             value={newCharacterName}
             onChange={(e) => setNewCharacterName(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyPress={handleAddKeyPress}
           />
           <Button onClick={handleAddClick} size="icon">
             <Plus />
@@ -56,15 +89,37 @@ export function ActionTracker({ characters, onAddCharacter, onRemoveCharacter }:
           <div className="space-y-2 pr-2">
             {characters.length > 0 ? (
               characters.map(character => (
-                <div key={character} className="flex items-center justify-between p-2 bg-secondary rounded-md text-sm">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    <span>{character}</span>
+                <div key={character} className="group flex items-center justify-between p-2 bg-secondary rounded-md text-sm">
+                  <div className="flex items-center gap-2 w-full">
+                    <User className="w-4 h-4 shrink-0" />
+                    {editingName === character ? (
+                       <Input 
+                          ref={editInputRef}
+                          value={editedValue}
+                          onChange={(e) => setEditedValue(e.target.value)}
+                          onBlur={handleEditSave}
+                          onKeyDown={handleEditKeyDown}
+                          className="h-7 text-sm"
+                       />
+                    ) : (
+                      <span 
+                        className="truncate cursor-pointer hover:text-accent"
+                        onClick={() => handleEditClick(character)}
+                      >
+                        {character}
+                      </span>
+                    )}
                   </div>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onRemoveCharacter(character)}>
-                    <X className="w-4 h-4" />
-                    <span className="sr-only">Remove {character}</span>
-                  </Button>
+                  <div className="flex items-center">
+                    <Button variant="ghost" size="icon" className={cn("h-6 w-6 shrink-0", editingName === character ? "hidden": "")} onClick={() => handleEditClick(character)}>
+                        <Pencil className="w-3 h-3" />
+                        <span className="sr-only">Edit {character}</span>
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => onRemoveCharacter(character)}>
+                      <X className="w-4 h-4" />
+                      <span className="sr-only">Remove {character}</span>
+                    </Button>
+                  </div>
                 </div>
               ))
             ) : (
