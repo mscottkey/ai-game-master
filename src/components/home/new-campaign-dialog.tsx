@@ -47,6 +47,7 @@ export function NewCampaignDialog() {
   const [campaignPrompt, setCampaignPrompt] = useState("");
   const [characterPrompt, setCharacterPrompt] = useState("");
   const [localPlay, setLocalPlay] = useState(false);
+  const [useMocks, setUseMocks] = useState(true);
   const [open, setOpen] = useState(false);
 
   // Use a ref to ensure the game ID is stable across re-renders of the dialog
@@ -85,6 +86,9 @@ export function NewCampaignDialog() {
     }
     if (localPlay) {
       params.set("local", "true");
+    }
+    if (useMocks) {
+      params.set("useMocks", "true");
     }
     return `/game/${gameIdRef.current}?${params.toString()}`;
   }
@@ -179,9 +183,19 @@ export function NewCampaignDialog() {
                   }
                 />
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="local-play-mode" className="flex flex-col gap-1">
+                  <span>Local Play Mode</span>
+                  <span className="text-xs font-normal text-muted-foreground">For multiple players on one device.</span>
+                </Label>
                 <Switch id="local-play-mode" checked={localPlay} onCheckedChange={setLocalPlay} />
-                <Label htmlFor="local-play-mode">Local Play Mode</Label>
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="mock-ai-mode" className="flex flex-col gap-1">
+                  <span>Mock AI (Dev Toggle)</span>
+                  <span className="text-xs font-normal text-muted-foreground">Use placeholder data to avoid API calls.</span>
+                </Label>
+                <Switch id="mock-ai-mode" checked={useMocks} onCheckedChange={setUseMocks} />
               </div>
             </div>
             <DialogFooter className="flex justify-between w-full pt-4">

@@ -10,6 +10,7 @@ export const RulesAwareStoryTellingInputSchema = z.object({
   campaignHistory: z.string().describe('A summary of the campaign history.'),
   messageType: z.enum(['in-character', 'out-of-character']).describe('The type of message from the player.'),
   sessionId: z.string().describe('The unique ID for the current game session.'),
+  useMocks: z.boolean().optional().describe('Whether to use mock data instead of calling the AI.'),
 });
 export type RulesAwareStoryTellingInput = z.infer<typeof RulesAwareStoryTellingInputSchema>;
 

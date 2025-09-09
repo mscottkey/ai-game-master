@@ -58,9 +58,10 @@ export interface GameClientProps {
   system: GameSystem;
   campaignPrompt?: string;
   characterPrompt?: string;
+  useMocks?: boolean;
 }
 
-export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: GameClientProps) {
+export function GameClient({ gameId, system, campaignPrompt, characterPrompt, useMocks = true }: GameClientProps) {
   const { toast } = useToast();
   const { speak, isSpeaking } = useTTS();
 
@@ -97,6 +98,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
         campaignHistory: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
         messageType: mode,
         sessionId: gameId,
+        useMocks: useMocks && messages.length < 2, // Only use mocks for the very first real interaction if enabled
       };
       
       const storyResult = await rulesAwareStoryTelling(storyInput);
@@ -179,7 +181,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
     try {
       // Generate character and story in parallel
       const characterPromise = characterPrompt 
-        ? generateCharacter({ characterPrompt, gameSystem: system })
+        ? generateCharacter({ characterPrompt, gameSystem: system, useMocks })
         : Promise.resolve(null);
 
       const storyPromise = (async () => {
@@ -193,6 +195,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
           campaignHistory: 'This is the very beginning of the campaign.',
           messageType: 'in-character', // Initial story is always in-character
           sessionId: gameId,
+          useMocks: useMocks,
         };
         return rulesAwareStoryTelling(storyInput);
       })();
@@ -227,7 +230,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt }: 
     } finally {
       setisInitialLoading(false);
     }
-  }, [system, gameId, campaignPrompt, characterPrompt, toast, activeSystemSettings]);
+  }, [system, gameId, campaignPrompt, characterPrompt, toast, activeSystemSettings, useMocks]);
 
   useEffect(() => {
     generateInitialState();

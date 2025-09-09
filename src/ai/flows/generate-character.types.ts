@@ -7,6 +7,7 @@ import { z } from 'genkit';
 export const GenerateCharacterInputSchema = z.object({
   characterPrompt: z.string().describe('A descriptive prompt for the character to be generated.'),
   gameSystem: z.enum(['dnd5e', 'fate', 'starwars-ffg']).describe('The tabletop RPG system to be used.'),
+  useMocks: z.boolean().optional().describe('Whether to use mock data instead of calling the AI.'),
 });
 export type GenerateCharacterInput = z.infer<typeof GenerateCharacterInputSchema>;
 

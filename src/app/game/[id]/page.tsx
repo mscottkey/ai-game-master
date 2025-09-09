@@ -16,7 +16,8 @@ type GamePageProps = {
     system?: string,
     campaign?: string,
     character?: string,
-    local?: string
+    local?: string,
+    useMocks?: string,
   }>;
 }
 
@@ -42,6 +43,7 @@ export default function GamePage({
     system: searchParams.system || 'dnd5e',
     campaignPrompt: searchParams.campaign,
     characterPrompt: searchParams.character,
+    useMocks: searchParams.useMocks === 'true',
   };
 
   if (searchParams.local === 'true') {

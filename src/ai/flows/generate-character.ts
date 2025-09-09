@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -116,8 +117,8 @@ const generateCharacterFlow = ai.defineFlow(
   async (input) => {
     // Return mock data if the character prompt indicates it's the start of the game.
     // This avoids using the AI for the initial setup, saving API calls during UI development.
-    if (input.characterPrompt?.includes('ready to begin') || input.characterPrompt === 'A new adventurer' || input.characterPrompt?.includes('seeking adventure')) {
-      console.log('Returning mock character data for initial load.');
+    if (input.useMocks) {
+      console.log('Returning mock character data because useMocks is true.');
       switch (input.gameSystem) {
         case 'dnd5e': return mockDndCharacter;
         case 'fate': return mockFateCharacter;

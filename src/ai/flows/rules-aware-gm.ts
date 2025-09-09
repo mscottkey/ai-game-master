@@ -47,8 +47,8 @@ const rulesAwareStoryTellingFlow = ai.defineFlow(
     
     // --- MOCK DATA FOR INITIAL SCENE ---
     // If this is the first message of the campaign, return a mock scenario to save API calls.
-    if (input.campaignHistory === 'This is the very beginning of the campaign.') {
-      console.log('Returning mock story data for initial load.');
+    if (input.useMocks) {
+      console.log('Returning mock story data because useMocks is true.');
       let mockNarrative = "Welcome, adventurers! Your journey begins in the bustling town square of Silverhaven. The air is thick with the smell of baked bread and distant livestock. A grand fountain bubbles in the center, and merchants hawk their wares from colorful stalls. What do you do first?";
       
       if (input.gameSetting.includes('Eldoria')) { // D&D 5e

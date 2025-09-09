@@ -34,7 +34,7 @@ const systemSettings: Record<GameSystem, { gameSetting: string; imagePromptPrefi
   },
 };
 
-export function LocalPlayClient({ gameId, system, campaignPrompt, characterPrompt }: GameClientProps) {
+export function LocalPlayClient({ gameId, system, campaignPrompt, characterPrompt, useMocks = true }: GameClientProps) {
   const { toast } = useToast();
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -79,6 +79,7 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
         campaignHistory: messages.map(m => `${m.role}: ${m.content}`).join('\n'),
         messageType: mode,
         sessionId: gameId,
+        useMocks: useMocks && messages.length < 2, // Only use mocks for the very first real interaction if enabled
       };
       
       const storyResult = await rulesAwareStoryTelling(storyInput);
@@ -145,6 +146,7 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
         campaignHistory: 'This is the very beginning of the campaign.',
         messageType: 'in-character',
         sessionId: gameId,
+        useMocks: useMocks,
       };
       
       const storyResult = await rulesAwareStoryTelling(storyInput);
@@ -173,7 +175,7 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
     } finally {
       setIsInitialLoading(false);
     }
-  }, [gameId, system, campaignPrompt, characterPrompt, toast, activeSystemSettings]);
+  }, [gameId, system, campaignPrompt, characterPrompt, toast, activeSystemSettings, useMocks]);
 
   useEffect(() => {
     generateInitialState();
