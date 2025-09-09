@@ -54,7 +54,7 @@ export function VisualStoryBoard({ story, imageUrl, isLoading, latestNarrative, 
             <div className="text-center text-muted-foreground">The Game Master is weaving the opening narrative...</div>
           ) : (
             <ReactMarkdown 
-              className="prose prose-sm prose-invert max-w-none"
+              className="prose prose-sm prose-invert max-w-none pr-10"
               components={{
                 p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
                 strong: ({node, ...props}) => <strong className="font-bold text-foreground" {...props} />,
