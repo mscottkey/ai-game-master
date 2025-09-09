@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from 'firebase/auth';
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithRedirect, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 
@@ -24,11 +24,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      toast({ title: "Successfully signed in!" });
-    } catch (error) {
+      // Use signInWithRedirect instead of signInWithPopup
+      await signInWithRedirect(auth, provider);
+      // Note: The toast for success will now effectively appear on page reload after redirect.
+    } catch (error: any) {
       console.error('Error signing in with Google', error);
-      toast({ title: "Sign in failed", description: "Could not sign in with Google.", variant: "destructive" });
+      toast({ title: "Sign in failed", description: error.message || "Could not sign in with Google.", variant: "destructive" });
     }
   };
 
@@ -45,6 +46,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
+      if (user) {
+        // This is a good place to show a welcome back toast if needed,
+        // as this will run after the redirect sign-in is complete.
+      }
       setLoading(false);
     });
 
