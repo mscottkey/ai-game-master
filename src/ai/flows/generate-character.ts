@@ -15,6 +15,9 @@ import {
   StarWarsCharacterSchema,
   type GenerateCharacterInput,
   type GenerateCharacterOutput,
+  Dnd5eCharacter,
+  FateCharacter,
+  StarWarsCharacter,
 } from './generate-character.types';
 
 
@@ -58,6 +61,51 @@ Create a compelling character with a name, species, career, wounds, strain, char
 `,
 });
 
+// --- MOCK DATA ---
+const mockDndCharacter: Dnd5eCharacter = {
+  name: 'Kaelen',
+  level: 5,
+  class: 'Ranger',
+  race: 'Wood Elf',
+  hp: 42,
+  ac: 16,
+  stats: { strength: 12, dexterity: 18, wisdom: 16, charisma: 10 },
+  inventory: ['Longbow', 'Quiver of 20 arrows', 'Leather armor', 'Dagger', 'Explorer\'s pack'],
+  abilities: ['Fey Ancestry', 'Sharpshooter', 'Hunter\'s Mark'],
+};
+
+const mockFateCharacter: FateCharacter = {
+  name: 'Silas "Sly" Vance',
+  description: 'A sharp-witted private eye with a rumpled trench coat and a past that\'s even messier.',
+  fatePoints: 3,
+  refresh: 3,
+  aspects: [
+    { type: 'High Concept', name: 'Hardboiled Detective with a Conscience' },
+    { type: 'Trouble', name: 'Owes a Debt to the Blackwood Gang' },
+    { type: 'Other', name: 'Never Forgets a Face' },
+  ],
+  skills: [
+    { name: 'Investigate', rank: 4 },
+    { name: 'Shoot', rank: 3 },
+    { name: 'Contacts', rank: 3 },
+    { name: 'Deceive', rank: 2 },
+  ],
+};
+
+const mockStarWarsCharacter: StarWarsCharacter = {
+  name: 'Zorii Vex',
+  species: 'Twi\'lek',
+  career: 'Smuggler',
+  wounds: { current: 0, threshold: 14 },
+  strain: { current: 0, threshold: 12 },
+  characteristics: { brawn: 2, agility: 4, intellect: 3, cunning: 3, willpower: 2, presence: 2 },
+  skills: ['Piloting (Space)', 'Ranged (Light)', 'Skulduggery'],
+  talents: ['Galaxy Mapper', 'Grit'],
+  motivation: 'Freedom',
+  obligation: 'Debt (5)',
+};
+// --- END MOCK DATA ---
+
 
 const generateCharacterFlow = ai.defineFlow(
   {
@@ -66,6 +114,18 @@ const generateCharacterFlow = ai.defineFlow(
     outputSchema: GenerateCharacterOutputSchema,
   },
   async (input) => {
+    // Return mock data if the character prompt indicates it's the start of the game.
+    // This avoids using the AI for the initial setup, saving API calls during UI development.
+    if (input.characterPrompt?.includes('ready to begin') || input.characterPrompt === 'A new adventurer' || input.characterPrompt?.includes('seeking adventure')) {
+      console.log('Returning mock character data for initial load.');
+      switch (input.gameSystem) {
+        case 'dnd5e': return mockDndCharacter;
+        case 'fate': return mockFateCharacter;
+        case 'starwars-ffg': return mockStarWarsCharacter;
+        default: break;
+      }
+    }
+
     switch (input.gameSystem) {
       case 'dnd5e':
         const { output: dndOutput } = await dndPrompt(input);
