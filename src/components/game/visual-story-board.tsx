@@ -1,19 +1,24 @@
+
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LoadingState } from "./loading-state";
 import ReactMarkdown from 'react-markdown';
+import { Button } from "../ui/button";
+import { Volume2 } from "lucide-react";
 
 type VisualStoryBoardProps = {
   story: string;
   imageUrl: string;
   isLoading: boolean;
+  latestNarrative: string;
+  onSpeak: (text: string) => void;
 };
 
-export function VisualStoryBoard({ story, imageUrl, isLoading }: VisualStoryBoardProps) {
+export function VisualStoryBoard({ story, imageUrl, isLoading, latestNarrative, onSpeak }: VisualStoryBoardProps) {
   return (
     <Card className="flex-shrink-0 flex flex-col h-full">
-      <div className="relative w-full h-1/2">
+      <div className="relative w-full h-full">
         {isLoading ? (
           <div className="w-full h-full bg-secondary rounded-t-lg flex items-center justify-center">
              <LoadingState message="Setting the scene..." />
@@ -32,7 +37,18 @@ export function VisualStoryBoard({ story, imageUrl, isLoading }: VisualStoryBoar
           </div>
         )}
       </div>
-      <CardContent className="p-4 flex-1">
+      <CardContent className="p-4 flex-1 relative">
+         {latestNarrative && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="absolute top-4 right-4 z-10"
+            onClick={() => onSpeak(latestNarrative)}
+            aria-label="Read latest narrative aloud"
+          >
+            <Volume2 />
+          </Button>
+        )}
         <ScrollArea className="h-full">
           {isLoading ? (
             <div className="text-center text-muted-foreground">The Game Master is weaving the opening narrative...</div>

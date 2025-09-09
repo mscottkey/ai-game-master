@@ -30,6 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useTTS } from '@/hooks/use-tts';
 
 type GameSystem = 'dnd5e' | 'fate' | 'starwars-ffg';
 type Character = Dnd5eCharacter | FateCharacter | StarWarsCharacter;
@@ -52,9 +53,11 @@ const systemSettings: Record<GameSystem, { gameSetting: string; imagePromptPrefi
 
 export function LocalPlayClient({ gameId, system, campaignPrompt, characterPrompt, useMocks = true }: GameClientProps) {
   const { toast } = useToast();
+  const { speak } = useTTS();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [story, setStory] = useState('');
+  const [latestNarrative, setLatestNarrative] = useState('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [characters, setCharacters] = useState<Character[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,6 +95,7 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
       };
       
       const storyResult = await rulesAwareStoryTelling(storyInput);
+      setLatestNarrative(storyResult.narrative);
       
       const newAssistantMessage: Message = {
         id: crypto.randomUUID(),
@@ -168,6 +172,8 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
       };
       
       const storyResult = await rulesAwareStoryTelling(storyInput);
+      
+      setLatestNarrative(storyResult.narrative);
 
       const initialMessage: Message = {
         id: crypto.randomUUID(),
@@ -238,15 +244,15 @@ export function LocalPlayClient({ gameId, system, campaignPrompt, characterPromp
   return (
     <div className="flex flex-col h-screen bg-background font-body">
       <Header gameId={gameId} />
-      <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden gap-4 p-4">
-        <div className="lg:col-span-8 h-full overflow-hidden flex flex-col">
-            <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} />
+      <main className="grid flex-1 grid-cols-1 gap-4 p-4 overflow-hidden lg:grid-cols-12">
+        <div className="flex flex-col h-full col-span-1 gap-4 lg:col-span-8">
+          <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} latestNarrative={latestNarrative} onSpeak={speak} />
         </div>
-        <div className="lg:col-span-4 h-full flex flex-col gap-4 overflow-hidden">
+        <div className="flex flex-col h-full col-span-1 gap-4 overflow-hidden lg:col-span-4">
            <div className="flex-1 min-h-0">
              <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} characters={characters.map(c => c.name)} isLocalPlay={true} />
           </div>
-          <div className="flex-1 flex flex-col gap-4 min-h-0">
+          <div className="flex flex-col flex-1 gap-4 min-h-0">
              <ActionTracker 
               characters={characters}
               onAddCharacter={handleAddCharacter}

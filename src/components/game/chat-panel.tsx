@@ -4,15 +4,16 @@
 import type { Message } from 'ai/react';
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Loader2, Mic, MicOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '../ui/card';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useVoiceInput } from '@/hooks/use-voice-input';
 
 type MessageMode = 'in-character' | 'out-of-character';
 
@@ -29,6 +30,10 @@ export function ChatPanel({ messages, onSendMessage, isLoading, characters = [],
   const [mode, setMode] = useState<MessageMode>('in-character');
   const [selectedCharacter, setSelectedCharacter] = useState<string>('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const { transcript, isListening, startListening, stopListening, isSupported } = useVoiceInput({
+    onTranscript: (text) => setInput(prev => `${prev}${prev.length > 0 ? ' ' : ''}${text}`),
+  });
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -60,6 +65,13 @@ export function ChatPanel({ messages, onSendMessage, isLoading, characters = [],
       }
       onSendMessage(input.trim(), mode, characterToUse);
       setInput('');
+    }
+  };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
     }
   };
 
@@ -132,7 +144,7 @@ export function ChatPanel({ messages, onSendMessage, isLoading, characters = [],
             </Tooltip>
           </TooltipProvider>
         </div>
-        <form onSubmit={handleSubmit} className="flex gap-2">
+        <form onSubmit={handleSubmit} className="flex gap-2 items-start">
           {showCharacterSelector && (
             <Select value={selectedCharacter} onValueChange={setSelectedCharacter}>
               <SelectTrigger className="w-[180px]">
@@ -145,13 +157,29 @@ export function ChatPanel({ messages, onSendMessage, isLoading, characters = [],
               </SelectContent>
             </Select>
           )}
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={mode === 'in-character' ? 'What do you do?' : 'Ask the GM anything...'}
-            disabled={isLoading || (showCharacterSelector && !selectedCharacter)}
-            autoComplete="off"
-          />
+          <div className="relative w-full">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={mode === 'in-character' ? 'What do you do?' : 'Ask the GM anything...'}
+              disabled={isLoading || (showCharacterSelector && !selectedCharacter)}
+              autoComplete="off"
+              className="pr-10"
+              rows={1}
+            />
+             {isSupported && (
+               <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className={cn("absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8", isListening && "text-destructive")}
+                onClick={isListening ? stopListening : startListening}
+              >
+                {isListening ? <MicOff /> : <Mic />}
+              </Button>
+            )}
+          </div>
           <Button type="submit" disabled={isLoading || !input.trim() || (showCharacterSelector && !selectedCharacter)} size="icon">
             {isLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />

@@ -67,6 +67,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt, us
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [story, setStory] = useState('');
+  const [latestNarrative, setLatestNarrative] = useState('');
   const [imageUrl, setImageUrl] = useState<string>('');
   const [npcs, setNpcs] = useState<Npc[]>([]);
   const [character, setCharacter] = useState<Character>(null);
@@ -102,6 +103,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt, us
       };
       
       const storyResult = await rulesAwareStoryTelling(storyInput);
+      setLatestNarrative(storyResult.narrative);
       
       const newAssistantMessage: Message = {
         id: crypto.randomUUID(),
@@ -205,7 +207,9 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt, us
       if (characterResult) {
         setCharacter(characterResult as Character);
       }
-
+      
+      setLatestNarrative(storyResult.narrative);
+      
       const initialMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -274,7 +278,7 @@ export function GameClient({ gameId, system, campaignPrompt, characterPrompt, us
 
         {/* Center Panel */}
         <div className="flex flex-col col-span-1 lg:col-span-6 h-full overflow-hidden gap-4">
-           <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} />
+           <VisualStoryBoard story={story} imageUrl={imageUrl} isLoading={isInitialLoading} latestNarrative={latestNarrative} onSpeak={speak} />
            <ChatPanel messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} />
         </div>
 
