@@ -10,7 +10,7 @@ export function Header({ gameId }: HeaderProps) {
     <header className="flex items-center justify-between p-4 border-b border-border shadow-md shrink-0">
       <Link href="/">
         <h1 className="text-xl font-headline font-bold text-accent neon-glow">
-          RolePlai
+          <span className="text-primary-foreground">Rolepl</span>AI
         </h1>
       </Link>
       <div className="flex items-center gap-2">
