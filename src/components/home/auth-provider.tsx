@@ -17,15 +17,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Moved outside the component to prevent re-creation on every render
+const actionCodeSettings = {
+  url: typeof window !== 'undefined' ? window.location.href : 'http://localhost:9002',
+  handleCodeInApp: true,
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-
-  const actionCodeSettings = {
-    url: typeof window !== 'undefined' ? window.location.href : 'http://localhost:9002',
-    handleCodeInApp: true,
-  };
 
   const signInWithGoogle = useCallback(async () => {
     const provider = new GoogleAuthProvider();
@@ -65,7 +66,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('Error sending email link', error);
       toast({ title: "Sign in failed", description: error.message || "Could not send sign-in email.", variant: "destructive" });
     }
-  }, [toast, actionCodeSettings]);
+  }, [toast]);
 
   const logOut = async () => {
     try {
