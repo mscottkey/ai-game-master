@@ -78,6 +78,6 @@ If the message is 'out-of-character', answer their question helpfully as a GM.
       },
     });
 
-    return { narrative: output.text! };
+    return { narrative: output?.text ?? '' };
   }
 );
