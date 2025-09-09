@@ -62,7 +62,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         title: 'Check your email',
         description: `A sign-in link has been sent to ${email}.`,
       });
-    } catch (error: any) {
+    } catch (error: any)
+      {
       console.error('Error sending email link', error);
       toast({ title: "Sign in failed", description: error.message || "Could not send sign-in email.", variant: "destructive" });
     }
@@ -103,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, [toast]);
+  }, []);
 
   const value = { user, loading, signInWithGoogle, signInWithEmail, logOut };
 
