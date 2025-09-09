@@ -72,8 +72,17 @@ export function NewCampaignDialog() {
   }
 
   const handleRandomizeCharacter = () => {
-    setCharacterPrompt(generatePrompt(selectedSystem, 'character'));
-  }
+    if (localPlay) {
+      const numCharacters = Math.floor(Math.random() * 2) + 3; // 3 or 4 characters
+      const characters = [];
+      for (let i = 0; i < numCharacters; i++) {
+        characters.push(`- ${generatePrompt(selectedSystem, 'character')}`);
+      }
+      setCharacterPrompt(characters.join('\n'));
+    } else {
+      setCharacterPrompt(generatePrompt(selectedSystem, 'character'));
+    }
+  };
 
   const getStartLink = () => {
     const params = new URLSearchParams();
